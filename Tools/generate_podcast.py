@@ -157,13 +157,16 @@ def clean_markdown(markdown: str) -> str:
     return "\n\n".join(paragraphs)
 
 
-def build_prompt(source_text: str, metadata: Mapping[str, Any], duration: int) -> str:
+def build_prompt(source_text: str, metadata: Mapping[str, Any], duration: int, style: str = "executive") -> str:
     target_words = duration * 140
     return f"""Create a ready-to-read English podcast narration from the source below.
 
 Audience: executives, CIOs, AI governance leaders, and researchers.
 Format: one host, natural spoken prose only; no headings or bullet lists.
 Tone: calm, intellectually rigorous, and restrained.
+Voice style: {style}. Executive means concise, composed, authoritative, and practical;
+academic means analytical, precise, measured, and conceptually rigorous; keynote means
+clear, resonant, forward-looking, and restrained. Apply the selected style without theatricality.
 Length: about {target_words} words for approximately {duration} minutes.
 Open by stating the central question. Near the end, concisely synthesize practical implications.
 End by naturally connecting Insynergy with Decision Design.
@@ -359,6 +362,7 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("input", help="Markdown path, relative to the vault or absolute within it")
     result.add_argument("--duration", type=int, default=8, help="Estimated duration in minutes (default: 8)")
     result.add_argument("--voice", help="TTS voice")
+    result.add_argument("--style", choices=("executive", "academic", "keynote"), default="executive", help="Narration style profile")
     result.add_argument("--overwrite", action="store_true", help="Allow replacement of existing outputs")
     modes = result.add_mutually_exclusive_group()
     modes.add_argument("--script-only", action="store_true", help="Generate script and metadata only")
@@ -407,7 +411,7 @@ def run(args: argparse.Namespace) -> None:
         cleaned = clean_markdown(raw)
         if not cleaned:
             raise PodcastError("No narratable content remained after Markdown cleaning.")
-        script = generate_script(client, config.text_model, build_prompt(cleaned, source_metadata, args.duration))
+        script = generate_script(client, config.text_model, build_prompt(cleaned, source_metadata, args.duration, args.style))
         atomic_write_text(paths.script, script_document(script, title=title, source=source_relative, duration=args.duration, generated_at=generated_at, config=config, voice=voice))
 
     errors = validate_script(script, raw, args.duration)

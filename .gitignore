@@ -5,5 +5,7 @@ __pycache__/
 *.py[cod]
 .DS_Store
 
-# Generated locally; GitHub Actions publishes these as workflow artifacts.
-Podcast/
+# Temporary podcast build output. Published episode assets are explicitly tracked.
+Podcast/Public/
+Podcast/Audio/*.tmp.mp3
+Podcast/Assets/cover-source.png

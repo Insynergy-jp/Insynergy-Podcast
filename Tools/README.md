@@ -135,11 +135,50 @@ python -m unittest discover -s tests -v
 
 ## 11. GitHub Actions
 
-`.github/workflows/generate-podcast.yml` を使うと、GitHubのActions画面から記事パス、時間、音声を指定して手動実行できます。
+`.github/workflows/publish-podcast.yml` は、`main`への対象ファイルのpushまたはActions画面から実行できます。
 
 1. 対象記事をリポジトリの `Insights/` に置きます。
-2. Repository settingsの **Secrets and variables → Actions** に `OPENAI_API_KEY` を登録します。
-3. **Actions → Generate podcast MP3 → Run workflow** を開きます。
-4. 完了後、Workflow runの **Artifacts** から `podcast-<run number>` を取得します。
+2. `Podcast/Episodes/<ID>/episode.yml` を追加し、`podcast: true`、`status: published`を設定します。
+3. Repository settingsの **Secrets and variables → Actions** にSecret `OPENAI_API_KEY`とVariable `PODCAST_EMAIL`を登録します。
+4. `main`へpushするか、**Actions → Publish podcast → Run workflow** を開きます。
+5. 完了後、Pagesで公開され、Workflow runの **Artifacts** からも取得できます。
 
 RunnerからローカルのObsidian Vaultは参照できません。APIキーや `.env` はコミットせず、生成物は既定で30日保持されるArtifactとして受け取ります。
+
+## 12. Podcast Publishing Platform
+
+公開設定は `Podcast/podcast.yml`、各Episodeの唯一の編集元は `Podcast/Episodes/<ID>/episode.yml` です。`DD-001`形式のIDは変更不可のRSS GUIDおよびID3タグとして使われます。
+
+```text
+Insight push
+  → podcast: true / status: published を検証
+  → 変更された原文だけを生成
+  → Voice Style適用
+  → intro + 本編 + outro（素材がある場合）
+  → ID3タグ・カバー埋め込み
+  → RSS・番組ページ生成
+  → Artifact保存
+  → GitHub Pages公開
+```
+
+`voice_style` は `executive`, `academic`, `keynote` から選び、`Podcast/podcast.yml` で原稿方向とTTS音声を管理します。`intro.mp3`と`outro.mp3`は任意です。
+
+GitHub Actionsには次を設定します。
+
+- Repository Secret `OPENAI_API_KEY`
+- Repository Variable `PODCAST_EMAIL`（RSSに公開される専用連絡先）
+- Settings → Pages → Source: **GitHub Actions**
+
+公開URL:
+
+- Website: `https://insynergy-jp.github.io/Insynergy-Podcast/`
+- RSS: `https://insynergy-jp.github.io/Insynergy-Podcast/podcast.xml`
+
+ローカル検証（API生成済みファイルが必要）:
+
+```bash
+python Tools/run_pipeline.py
+xmllint --noout Podcast/Public/podcast.xml
+```
+
+原文SHA-256が前回のメタデータと一致するEpisodeは再生成しないため、不要なAPI課金を防止します。全件を意図的に再生成する場合のみActionsの `force_regeneration` を有効にします。

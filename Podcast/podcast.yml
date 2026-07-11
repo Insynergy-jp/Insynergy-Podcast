@@ -1,0 +1,26 @@
+title: Decision Design Podcast
+subtitle: Judgment architecture for AI-augmented organizations
+description: >-
+  Insynergy's podcast on Decision Design, AI governance, judgment,
+  authority, accountability, and organizational structure.
+language: en
+author: Ryoji Morii
+organization: Insynergy Inc.
+copyright: Copyright 2026 Insynergy Inc.
+contact_email: REPLACE_WITH_PUBLIC_EMAIL
+category: Business
+subcategory: Management
+explicit: false
+base_url: https://insynergy-jp.github.io/Insynergy-Podcast
+cover: Podcast/Assets/cover.jpg
+id_prefix: DD
+voice_profiles:
+  executive:
+    voice: nova
+    direction: concise, composed, authoritative, and practical
+  academic:
+    voice: onyx
+    direction: analytical, precise, measured, and conceptually rigorous
+  keynote:
+    voice: alloy
+    direction: clear, resonant, forward-looking, and restrained
