@@ -23,7 +23,7 @@ Hassabis put it simply: “After the arrival of AGI, we are in uncharted territo
 
 The discussion ranged across familiar terrain—the acceleration of scientific discovery, the risks of misuse, the specter of authoritarian control, the disruption of labor markets. Both leaders acknowledged that the systems they are building could, if mishandled, concentrate power in dangerous ways or escape meaningful human oversight entirely.
 
-And yet, for all its gravity, the conversation at Davos left something essential unexamined.
+And yet, for all its gravity, the conversation at Davos left something essenal unexamined.
 
 ## What Was Discussed—and What Was Not
 
