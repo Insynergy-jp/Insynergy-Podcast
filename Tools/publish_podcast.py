@@ -264,6 +264,7 @@ def create_index(show: dict[str, Any], episodes: list[tuple[Episode, Path, int]]
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="{esc(show["description"])}">
   <title>{esc(show["title"])}</title>
+  <link rel="icon" type="image/png" href="assets/insynergy-wave.png">
   <link rel="alternate" type="application/rss+xml" title="Podcast RSS" href="podcast.xml">
   <style>
     :root {{ color-scheme: dark; --bg:#0b0b0d; --panel:#101116; --fg:#f5f7fa; --muted:#8b909c; --border:#272930; --blue:#087cff; }}
