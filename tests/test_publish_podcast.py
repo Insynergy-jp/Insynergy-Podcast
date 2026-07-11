@@ -32,6 +32,15 @@ class PublishingTests(unittest.TestCase):
             show = pp.load_show()
         self.assertTrue(show["contact_email"].startswith("REPLACE_"))
 
+    def test_index_uses_brand_navigation_and_episode_player(self):
+        episode = pp.load_episodes()[0]
+        show = pp.load_show()
+        page = pp.create_index(show, [(episode, Path("episode.mp3"), 60)])
+        self.assertIn('class="brand"', page)
+        self.assertIn('id="episodes"', page)
+        self.assertIn("insynergy-wave.png", page)
+        self.assertNotIn("Georgia", page)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -186,6 +186,9 @@ def build_public(root: Path = ROOT, strict_email: bool = False) -> Path:
     if not cover.is_file():
         raise PublishError(f"Cover not found: {cover}")
     shutil.copyfile(cover, assets_dir / "cover.jpg")
+    wave = root / "Podcast" / "Assets" / "insynergy-wave.png"
+    if wave.is_file():
+        shutil.copyfile(wave, assets_dir / "insynergy-wave.png")
 
     published: list[tuple[Episode, Path, int]] = []
     for episode in episodes:
@@ -244,8 +247,81 @@ def create_feed(show: dict[str, Any], episodes: list[tuple[Episode, Path, int]])
 
 def create_index(show: dict[str, Any], episodes: list[tuple[Episode, Path, int]]) -> str:
     esc = lambda value: html.escape(str(value), quote=True)
-    cards = "\n".join(f'<article><span>{esc(e.id)} · Episode {e.number}</span><h2>{esc(e.title)}</h2><p>{esc(e.description)}</p><audio controls preload="metadata" src="audio/{esc(a.name)}"></audio></article>' for e, a, _ in episodes)
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{esc(show["title"])}</title><link rel="alternate" type="application/rss+xml" title="Podcast RSS" href="podcast.xml"><style>body{{margin:0;background:#071525;color:#f3eadc;font:17px/1.6 system-ui,sans-serif}}main{{max-width:920px;margin:auto;padding:48px 24px}}header{{display:grid;grid-template-columns:minmax(180px,320px) 1fr;gap:42px;align-items:center;margin-bottom:56px}}img{{width:100%;border-radius:4px}}h1{{font:clamp(2.4rem,6vw,5rem)/1.05 Georgia,serif;margin:.2em 0}}article{{border-top:1px solid #a96f42;padding:32px 0}}article span{{color:#d59660;letter-spacing:.08em}}h2{{font:2rem Georgia,serif}}audio{{width:100%}}a{{color:#f3c38f}}@media(max-width:650px){{header{{grid-template-columns:1fr}}}}</style></head><body><main><header><img src="assets/cover.jpg" alt="{esc(show["title"])}"><div><p>INSYNERGY</p><h1>{esc(show["title"])}</h1><p>{esc(show["description"])}</p><a href="podcast.xml">RSS Feed</a></div></header>{cards}</main></body></html>'''
+    cards = "\n".join(
+        f'''<article class="episode">
+          <div class="episode-meta"><span>{esc(e.id)}</span><span>Episode {e.number}</span><span>{e.published.strftime("%B %d, %Y").replace(" 0", " ")}</span></div>
+          <div class="episode-grid">
+            <div><h3>{esc(e.title)}</h3><p>{esc(e.description)}</p></div>
+            <div class="player"><audio controls preload="metadata" src="audio/{esc(a.name)}"></audio><a href="audio/{esc(a.name)}" download>Download MP3</a></div>
+          </div>
+        </article>'''
+        for e, a, _ in episodes
+    )
+    return f'''<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="{esc(show["description"])}">
+  <title>{esc(show["title"])}</title>
+  <link rel="alternate" type="application/rss+xml" title="Podcast RSS" href="podcast.xml">
+  <style>
+    :root {{ color-scheme: dark; --bg:#0b0b0d; --panel:#101116; --fg:#f5f7fa; --muted:#8b909c; --border:#272930; --blue:#087cff; }}
+    * {{ box-sizing:border-box; }}
+    html {{ scroll-behavior:smooth; }}
+    body {{ margin:0; background:var(--bg); color:var(--fg); font:16px/1.65 ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }}
+    a {{ color:inherit; }}
+    .shell {{ width:min(1120px,calc(100% - 48px)); margin:auto; }}
+    .site-header {{ border-bottom:1px solid var(--border); }}
+    .nav {{ min-height:72px; display:flex; align-items:center; justify-content:space-between; gap:24px; }}
+    .brand {{ display:flex; align-items:center; gap:12px; text-decoration:none; font-weight:600; letter-spacing:-.01em; }}
+    .brand img {{ width:58px; height:auto; display:block; }}
+    .nav-links {{ display:flex; align-items:center; gap:24px; color:var(--muted); font-size:14px; }}
+    .nav-links a {{ text-decoration:none; }}
+    .nav-links a:hover {{ color:var(--fg); }}
+    .hero {{ display:grid; grid-template-columns:minmax(280px,440px) minmax(0,1fr); gap:clamp(48px,8vw,104px); align-items:center; padding:clamp(64px,10vw,120px) 0; }}
+    .cover {{ width:100%; display:block; border:1px solid var(--border); border-radius:8px; box-shadow:0 28px 70px rgba(0,0,0,.3); }}
+    .eyebrow {{ margin:0 0 22px; color:#69aaff; font:500 12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.14em; text-transform:uppercase; }}
+    h1 {{ max-width:13ch; margin:0; font-size:clamp(42px,6vw,76px); line-height:1.02; letter-spacing:-.055em; font-weight:600; }}
+    .intro {{ max-width:600px; margin:28px 0 0; color:var(--muted); font-size:clamp(17px,2vw,20px); line-height:1.7; }}
+    .actions {{ display:flex; flex-wrap:wrap; gap:12px; margin-top:34px; }}
+    .button {{ display:inline-flex; min-height:46px; align-items:center; justify-content:center; padding:0 19px; border:1px solid var(--border); border-radius:8px; text-decoration:none; font-size:14px; font-weight:600; }}
+    .button.primary {{ color:#06111f; background:#f5f7fa; border-color:#f5f7fa; }}
+    .button:hover {{ opacity:.82; }}
+    .episodes {{ padding:0 0 100px; }}
+    .section-head {{ display:flex; align-items:end; justify-content:space-between; gap:24px; padding:30px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }}
+    .section-head h2 {{ margin:0; font-size:clamp(28px,4vw,42px); letter-spacing:-.035em; line-height:1.1; }}
+    .section-head p {{ margin:0; color:var(--muted); font:12px ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.1em; text-transform:uppercase; }}
+    .episode {{ padding:42px 0 48px; border-bottom:1px solid var(--border); }}
+    .episode-meta {{ display:flex; flex-wrap:wrap; gap:10px 24px; color:#69aaff; font:12px ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.08em; text-transform:uppercase; }}
+    .episode-grid {{ display:grid; grid-template-columns:minmax(0,1.45fr) minmax(280px,.75fr); gap:clamp(32px,6vw,80px); align-items:end; margin-top:24px; }}
+    .episode h3 {{ max-width:22ch; margin:0; font-size:clamp(28px,4vw,46px); line-height:1.12; letter-spacing:-.035em; font-weight:600; }}
+    .episode p {{ max-width:680px; margin:18px 0 0; color:var(--muted); }}
+    .player {{ padding:20px; background:var(--panel); border:1px solid var(--border); border-radius:10px; }}
+    audio {{ width:100%; display:block; }}
+    .player a {{ display:inline-block; margin-top:14px; color:var(--muted); font-size:13px; text-underline-offset:4px; }}
+    footer {{ border-top:1px solid var(--border); color:var(--muted); }}
+    .footer-inner {{ min-height:120px; display:flex; align-items:center; justify-content:space-between; gap:24px; font-size:13px; }}
+    @media (max-width:780px) {{
+      .shell {{ width:min(100% - 32px,1120px); }}
+      .hero {{ grid-template-columns:1fr; gap:38px; padding:48px 0 72px; }}
+      .cover {{ max-width:480px; }}
+      h1 {{ max-width:11ch; }}
+      .episode-grid {{ grid-template-columns:1fr; }}
+      .nav-links a:first-child {{ display:none; }}
+      .footer-inner {{ align-items:flex-start; flex-direction:column; justify-content:center; }}
+    }}
+  </style>
+</head>
+<body>
+  <header class="site-header"><nav class="shell nav" aria-label="Primary navigation"><a class="brand" href="https://insynergy.io/"><img src="assets/insynergy-wave.png" alt=""><span>Insynergy</span></a><div class="nav-links"><a href="https://insynergy.io/insights">Insights</a><a href="podcast.xml">RSS Feed</a></div></nav></header>
+  <main>
+    <section class="shell hero"><img class="cover" src="assets/cover.jpg" alt="{esc(show["title"])} cover"><div><p class="eyebrow">Insynergy Podcast</p><h1>{esc(show["title"])}</h1><p class="intro">{esc(show["description"])}</p><div class="actions"><a class="button primary" href="#episodes">Listen now</a><a class="button" href="podcast.xml">Subscribe via RSS</a></div></div></section>
+    <section class="shell episodes" id="episodes"><div class="section-head"><h2>Latest episodes</h2><p>{len(episodes)} episode{"s" if len(episodes) != 1 else ""}</p></div>{cards}</section>
+  </main>
+  <footer><div class="shell footer-inner"><span>© 2026 Insynergy Inc.</span><span>Decision Design for the AI era.</span></div></footer>
+</body>
+</html>'''
 
 
 def main() -> int:
