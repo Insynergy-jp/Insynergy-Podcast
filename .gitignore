@@ -1,0 +1,9 @@
+.env
+Tools/.env
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+
+# Generated locally; GitHub Actions publishes these as workflow artifacts.
+Podcast/
