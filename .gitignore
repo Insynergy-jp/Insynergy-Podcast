@@ -9,3 +9,6 @@ __pycache__/
 Podcast/Public/
 Podcast/Audio/*.tmp.mp3
 Podcast/Assets/cover-source.png
+Podcast/Assets/cover-wave-source.png
+Podcast/Assets/cover-wave-titlecase-source.png
+Podcast/Assets/cover-wave-system-font-source.png
