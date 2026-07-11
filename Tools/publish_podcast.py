@@ -317,7 +317,7 @@ def create_index(show: dict[str, Any], episodes: list[tuple[Episode, Path, int]]
 <body>
   <header class="site-header"><nav class="shell nav" aria-label="Primary navigation"><a class="brand" href="https://insynergy.io/"><img src="assets/insynergy-wave.png" alt=""><span>Insynergy</span></a><div class="nav-links"><a href="https://insynergy.io/insights">Insights</a><a href="podcast.xml">RSS Feed</a></div></nav></header>
   <main>
-    <section class="shell hero"><img class="cover" src="assets/cover.jpg" alt="{esc(show["title"])} cover"><div><p class="eyebrow">Insynergy Podcast</p><h1>{esc(show["title"])}</h1><p class="intro">{esc(show["description"])}</p><div class="actions"><a class="button primary" href="#episodes">Listen now</a><a class="button" href="podcast.xml">Subscribe via RSS</a></div></div></section>
+    <section class="shell hero"><img class="cover" src="assets/cover.jpg" alt="{esc(show["title"])} cover"><div><p class="eyebrow">Insynergy Podcast</p><h1>{esc(show["title"])}</h1><p class="intro">{esc(show["description"])}</p><div class="actions"><a class="button primary" href="#episodes">Listen now</a><a class="button" href="{esc(show["spotify_url"])}">Listen on Spotify</a><a class="button" href="podcast.xml">Subscribe via RSS</a></div></div></section>
     <section class="shell episodes" id="episodes"><div class="section-head"><h2>Latest episodes</h2><p>{len(episodes)} episode{"s" if len(episodes) != 1 else ""}</p></div>{cards}</section>
   </main>
   <footer><div class="shell footer-inner"><span>© 2026 Insynergy Inc.</span><span>Decision Design for the AI era.</span></div></footer>

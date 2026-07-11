@@ -39,6 +39,8 @@ class PublishingTests(unittest.TestCase):
         self.assertIn('class="brand"', page)
         self.assertIn('id="episodes"', page)
         self.assertIn("insynergy-wave.png", page)
+        self.assertIn(show["spotify_url"], page)
+        self.assertIn("Listen on Spotify", page)
         self.assertNotIn("Georgia", page)
 
 
