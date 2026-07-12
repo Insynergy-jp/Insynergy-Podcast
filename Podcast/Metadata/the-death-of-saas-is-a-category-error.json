@@ -1,0 +1,21 @@
+{
+  "title": "The “Death of SaaS” Is a Category Error",
+  "source_file": "Insights/The “Death of SaaS” Is a Category Error.md",
+  "script_file": "Podcast/Scripts/the-death-of-saas-is-a-category-error-podcast.md",
+  "audio_file": "Podcast/Audio/the-death-of-saas-is-a-category-error.mp3",
+  "language": "en",
+  "estimated_duration_minutes": 10,
+  "character_count": 10759,
+  "word_count": 1588,
+  "generated_at": "2026-07-12T00:52:30.066019+00:00",
+  "text_model": "gpt-5.4-mini",
+  "tts_model": "tts-1-hd",
+  "voice": "onyx",
+  "episode_id": "DD-002",
+  "episode": 2,
+  "voice_style": "academic",
+  "source_sha256": "588f36bf016b933dafb26ff4bc37dc704d407c3408f4939dde890ae79d1df899",
+  "published": "2026-07-12T10:00:00+09:00",
+  "duration_seconds": 662,
+  "public_audio_file": "audio/dd-002-the-death-of-saas-is-a-category-error.mp3"
+}
