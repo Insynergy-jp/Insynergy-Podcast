@@ -29,6 +29,7 @@ YOUTUBE_SCOPES = [YOUTUBE_UPLOAD_SCOPE, YOUTUBE_CAPTION_SCOPE]
 CAPTION_TIMING_VERSION = "audio-transcription-v1"
 CAPTION_TRANSCRIPTION_MODEL = "whisper-1"
 DEFAULT_CAPTION_TRANSLATION_MODEL = "gpt-5.4-mini"
+CAPTION_TRANSLATION_BATCH_SIZE = 20
 
 
 class YouTubePublishError(RuntimeError):
@@ -172,34 +173,38 @@ def transcribe_segments(client: Any, audio: Path) -> list[dict[str, Any]]:
 
 
 def translate_segments_to_japanese(client: Any, segments: list[dict[str, Any]], model: str) -> list[str]:
-    source = [{"id": index, "text": segment["text"]} for index, segment in enumerate(segments)]
-    prompt = (
-        "Translate each English podcast caption segment into natural, concise Japanese. "
-        "Preserve names, numbers, meaning, and segment boundaries. Return JSON only as an array "
-        "of objects with integer id and string text, with exactly one item for every input id.\n\n"
-        + json.dumps(source, ensure_ascii=False)
-    )
-    try:
-        response = client.responses.create(model=model, input=prompt)
-    except Exception as exc:
-        raise YouTubePublishError(f"OpenAI Japanese caption translation failed: {exc}") from exc
-    output = getattr(response, "output_text", None)
-    if not isinstance(output, str):
-        raise YouTubePublishError("Japanese caption translation returned no text")
-    cleaned = re.sub(r"\A```(?:json)?\s*|\s*```\Z", "", output.strip(), flags=re.IGNORECASE)
-    try:
-        translated = json.loads(cleaned)
-    except json.JSONDecodeError as exc:
-        raise YouTubePublishError("Japanese caption translation returned invalid JSON") from exc
-    if not isinstance(translated, list) or len(translated) != len(segments):
-        raise YouTubePublishError("Japanese caption translation changed the segment count")
-    by_id = {
-        item.get("id"): str(item.get("text", "")).strip()
-        for item in translated if isinstance(item, dict) and isinstance(item.get("id"), int)
-    }
-    if set(by_id) != set(range(len(segments))) or any(not text for text in by_id.values()):
-        raise YouTubePublishError("Japanese caption translation returned missing or empty segments")
-    return [by_id[index] for index in range(len(segments))]
+    all_translations: list[str] = []
+    for offset in range(0, len(segments), CAPTION_TRANSLATION_BATCH_SIZE):
+        batch = segments[offset:offset + CAPTION_TRANSLATION_BATCH_SIZE]
+        source = [{"id": index, "text": segment["text"]} for index, segment in enumerate(batch)]
+        prompt = (
+            "Translate each English podcast caption segment into natural, concise Japanese. "
+            "Preserve names, numbers, meaning, and segment boundaries. Return JSON only as an array "
+            "of objects with integer id and string text, with exactly one item for every input id.\n\n"
+            + json.dumps(source, ensure_ascii=False)
+        )
+        try:
+            response = client.responses.create(model=model, input=prompt)
+        except Exception as exc:
+            raise YouTubePublishError(f"OpenAI Japanese caption translation failed: {exc}") from exc
+        output = getattr(response, "output_text", None)
+        if not isinstance(output, str):
+            raise YouTubePublishError("Japanese caption translation returned no text")
+        cleaned = re.sub(r"\A```(?:json)?\s*|\s*```\Z", "", output.strip(), flags=re.IGNORECASE)
+        try:
+            translated = json.loads(cleaned)
+        except json.JSONDecodeError as exc:
+            raise YouTubePublishError("Japanese caption translation returned invalid JSON") from exc
+        if not isinstance(translated, list) or len(translated) != len(batch):
+            raise YouTubePublishError("Japanese caption translation changed the segment count")
+        by_id = {
+            item.get("id"): str(item.get("text", "")).strip()
+            for item in translated if isinstance(item, dict) and isinstance(item.get("id"), int)
+        }
+        if set(by_id) != set(range(len(batch))) or any(not text for text in by_id.values()):
+            raise YouTubePublishError("Japanese caption translation returned missing or empty segments")
+        all_translations.extend(by_id[index] for index in range(len(batch)))
+    return all_translations
 
 
 def build_timed_srt(segments: list[dict[str, Any]], texts: list[str] | None = None) -> str:
@@ -247,6 +252,21 @@ def update_caption(youtube: Any, caption_id: str, caption: Path) -> str:
     return str(updated_id)
 
 
+def existing_caption_ids(youtube: Any, video_id: str) -> dict[str, str]:
+    response = youtube.captions().list(part="snippet", videoId=video_id).execute()
+    ids: dict[str, str] = {}
+    for item in response.get("items", []) if isinstance(response, dict) else []:
+        snippet = item.get("snippet", {}) if isinstance(item, dict) else {}
+        caption_id = item.get("id") if isinstance(item, dict) else None
+        language = snippet.get("language") if isinstance(snippet, dict) else None
+        name = snippet.get("name") if isinstance(snippet, dict) else None
+        if caption_id and language == "en" and name == "English":
+            ids["en"] = str(caption_id)
+        elif caption_id and language == "ja" and name == "日本語":
+            ids["ja"] = str(caption_id)
+    return ids
+
+
 def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], config: Mapping[str, Any], root: Path = ROOT, openai_client: Any | None = None) -> str | None:
     script, audio, metadata_path = generated_paths(episode, root)
     if not audio.is_file() or not script.is_file() or not metadata_path.is_file():
@@ -261,6 +281,11 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
         print(f"YouTube uploaded: {episode.id} https://youtu.be/{video_id}")
     else:
         print(f"YouTube video fresh: {episode.id} ({video_id})")
+    remote_captions = existing_caption_ids(youtube, str(video_id))
+    if not metadata.get("youtube_caption_id") and remote_captions.get("en"):
+        metadata["youtube_caption_id"] = remote_captions["en"]
+    if not metadata.get("youtube_japanese_caption_id") and remote_captions.get("ja"):
+        metadata["youtube_japanese_caption_id"] = remote_captions["ja"]
     captions_fresh = (
         metadata.get("youtube_caption_timing") == CAPTION_TIMING_VERSION
         and metadata.get("youtube_caption_id")
