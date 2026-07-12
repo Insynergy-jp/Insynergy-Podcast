@@ -26,7 +26,7 @@ from publish_podcast import ROOT, Episode, generated_paths, load_episodes, load_
 YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload"
 YOUTUBE_CAPTION_SCOPE = "https://www.googleapis.com/auth/youtube.force-ssl"
 YOUTUBE_SCOPES = [YOUTUBE_UPLOAD_SCOPE, YOUTUBE_CAPTION_SCOPE]
-CAPTION_TIMING_VERSION = "audio-transcription-v1"
+CAPTION_TIMING_VERSION = "audio-transcription-v2"
 CAPTION_TRANSCRIPTION_MODEL = "whisper-1"
 DEFAULT_CAPTION_TRANSLATION_MODEL = "gpt-5.4-mini"
 CAPTION_TRANSLATION_BATCH_SIZE = 20
@@ -147,6 +147,11 @@ def _field(value: Any, name: str) -> Any:
     return getattr(value, name, None)
 
 
+def normalize_caption_text(text: str) -> str:
+    """Keep brand spelling stable when speech transcription changes casing."""
+    return re.sub(r"\binsynergy\b", "Insynergy", text, flags=re.IGNORECASE)
+
+
 def transcribe_segments(client: Any, audio: Path) -> list[dict[str, Any]]:
     """Transcribe final audio so caption times follow speech and pauses."""
     try:
@@ -162,7 +167,7 @@ def transcribe_segments(client: Any, audio: Path) -> list[dict[str, Any]]:
         raise YouTubePublishError(f"OpenAI audio transcription failed: {exc}") from exc
     segments: list[dict[str, Any]] = []
     for item in _field(transcription, "segments") or []:
-        text = str(_field(item, "text") or "").strip()
+        text = normalize_caption_text(str(_field(item, "text") or "").strip())
         start = _field(item, "start")
         end = _field(item, "end")
         if text and isinstance(start, (int, float)) and isinstance(end, (int, float)) and end > start:
