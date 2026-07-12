@@ -2,6 +2,17 @@
 
 英語のObsidian Insight記事から、OpenAI Responses APIで英語の一人語り原稿を作成し、Speech APIでMP3を生成するCLIです。
 
+## 新規チャットからの一気通貫公開
+
+このプロジェクトを開いた新規Codexチャットでは、次の定型文だけで記事登録、Podcast生成、RSS配信、YouTube公開、英語字幕、PRマージ、公開確認まで実行します。詳細な実行規約はリポジトリ直下の `AGENTS.md` にあります。
+
+```text
+DD-004として、次のMarkdown記事からPodcastを作成し、RSS配信とYouTube公開（英語字幕を含む）まで一気通貫で実行してください。
+'/absolute/path/to/article.md'
+```
+
+既定値は10分、`academic` voice style、即時公開です。時間や話し方を変える場合だけ、定型文に「8分・executive」のように追記してください。
+
 ## 1. 必要環境
 
 - Python 3.12以上
