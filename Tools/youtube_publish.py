@@ -18,6 +18,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from mutagen.mp3 import MP3
+from openai import OpenAI
 
 from publish_podcast import ROOT, Episode, generated_paths, load_episodes, load_show
 
@@ -25,6 +26,9 @@ from publish_podcast import ROOT, Episode, generated_paths, load_episodes, load_
 YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload"
 YOUTUBE_CAPTION_SCOPE = "https://www.googleapis.com/auth/youtube.force-ssl"
 YOUTUBE_SCOPES = [YOUTUBE_UPLOAD_SCOPE, YOUTUBE_CAPTION_SCOPE]
+CAPTION_TIMING_VERSION = "audio-transcription-v1"
+CAPTION_TRANSCRIPTION_MODEL = "whisper-1"
+DEFAULT_CAPTION_TRANSLATION_MODEL = "gpt-5.4-mini"
 
 
 class YouTubePublishError(RuntimeError):
@@ -128,13 +132,6 @@ def upload_video(youtube: Any, video: Path, body: Mapping[str, Any]) -> str:
     return str(video_id)
 
 
-def caption_segments(script: str, words_per_segment: int = 12) -> list[str]:
-    script = re.sub(r"\A---.*?---\s*", "", script, flags=re.DOTALL)
-    script = re.sub(r"\s+", " ", script).strip()
-    words = script.split()
-    return [" ".join(words[index:index + words_per_segment]) for index in range(0, len(words), words_per_segment)]
-
-
 def srt_timestamp(seconds: float) -> str:
     milliseconds = max(0, round(seconds * 1000))
     hours, remainder = divmod(milliseconds, 3_600_000)
@@ -143,34 +140,93 @@ def srt_timestamp(seconds: float) -> str:
     return f"{hours:02d}:{minutes:02d}:{secs:02d},{millis:03d}"
 
 
-def build_srt(script: str, duration: float) -> str:
-    segments = caption_segments(script)
-    if not segments or duration <= 0:
-        raise YouTubePublishError("Cannot create captions from an empty script or audio")
-    weights = [max(1, len(segment.split())) for segment in segments]
-    total_weight = sum(weights)
-    elapsed = 0.0
+def _field(value: Any, name: str) -> Any:
+    if isinstance(value, Mapping):
+        return value.get(name)
+    return getattr(value, name, None)
+
+
+def transcribe_segments(client: Any, audio: Path) -> list[dict[str, Any]]:
+    """Transcribe final audio so caption times follow speech and pauses."""
+    try:
+        with audio.open("rb") as audio_file:
+            transcription = client.audio.transcriptions.create(
+                file=audio_file,
+                model=CAPTION_TRANSCRIPTION_MODEL,
+                language="en",
+                response_format="verbose_json",
+                timestamp_granularities=["segment"],
+            )
+    except Exception as exc:
+        raise YouTubePublishError(f"OpenAI audio transcription failed: {exc}") from exc
+    segments: list[dict[str, Any]] = []
+    for item in _field(transcription, "segments") or []:
+        text = str(_field(item, "text") or "").strip()
+        start = _field(item, "start")
+        end = _field(item, "end")
+        if text and isinstance(start, (int, float)) and isinstance(end, (int, float)) and end > start:
+            segments.append({"start": float(start), "end": float(end), "text": text})
+    if not segments:
+        raise YouTubePublishError("Audio transcription returned no timestamped segments")
+    return segments
+
+
+def translate_segments_to_japanese(client: Any, segments: list[dict[str, Any]], model: str) -> list[str]:
+    source = [{"id": index, "text": segment["text"]} for index, segment in enumerate(segments)]
+    prompt = (
+        "Translate each English podcast caption segment into natural, concise Japanese. "
+        "Preserve names, numbers, meaning, and segment boundaries. Return JSON only as an array "
+        "of objects with integer id and string text, with exactly one item for every input id.\n\n"
+        + json.dumps(source, ensure_ascii=False)
+    )
+    try:
+        response = client.responses.create(model=model, input=prompt)
+    except Exception as exc:
+        raise YouTubePublishError(f"OpenAI Japanese caption translation failed: {exc}") from exc
+    output = getattr(response, "output_text", None)
+    if not isinstance(output, str):
+        raise YouTubePublishError("Japanese caption translation returned no text")
+    cleaned = re.sub(r"\A```(?:json)?\s*|\s*```\Z", "", output.strip(), flags=re.IGNORECASE)
+    try:
+        translated = json.loads(cleaned)
+    except json.JSONDecodeError as exc:
+        raise YouTubePublishError("Japanese caption translation returned invalid JSON") from exc
+    if not isinstance(translated, list) or len(translated) != len(segments):
+        raise YouTubePublishError("Japanese caption translation changed the segment count")
+    by_id = {
+        item.get("id"): str(item.get("text", "")).strip()
+        for item in translated if isinstance(item, dict) and isinstance(item.get("id"), int)
+    }
+    if set(by_id) != set(range(len(segments))) or any(not text for text in by_id.values()):
+        raise YouTubePublishError("Japanese caption translation returned missing or empty segments")
+    return [by_id[index] for index in range(len(segments))]
+
+
+def build_timed_srt(segments: list[dict[str, Any]], texts: list[str] | None = None) -> str:
+    if not segments or (texts is not None and len(texts) != len(segments)):
+        raise YouTubePublishError("Cannot create timed captions without matching segments")
     blocks = []
-    for index, (segment, weight) in enumerate(zip(segments, weights), start=1):
-        start = elapsed
-        elapsed += duration * weight / total_weight
-        end = duration if index == len(segments) else elapsed
-        blocks.append(f"{index}\n{srt_timestamp(start)} --> {srt_timestamp(end)}\n{segment}")
+    for index, segment in enumerate(segments, start=1):
+        text = segment["text"] if texts is None else texts[index - 1]
+        blocks.append(
+            f"{index}\n{srt_timestamp(segment['start'])} --> {srt_timestamp(segment['end'])}\n{text}"
+        )
     return "\n\n".join(blocks) + "\n"
 
 
-def create_caption_file(script: Path, audio: Path, destination: Path) -> None:
-    if not script.is_file():
-        raise YouTubePublishError(f"Podcast script is missing: {script}")
-    duration = float(MP3(audio).info.length)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(build_srt(script.read_text(encoding="utf-8"), duration), encoding="utf-8")
+def create_synced_caption_files(client: Any, audio: Path, english: Path, japanese: Path) -> None:
+    segments = transcribe_segments(client, audio)
+    model = os.getenv("OPENAI_CAPTION_TRANSLATION_MODEL", DEFAULT_CAPTION_TRANSLATION_MODEL)
+    translations = translate_segments_to_japanese(client, segments, model)
+    english.parent.mkdir(parents=True, exist_ok=True)
+    english.write_text(build_timed_srt(segments), encoding="utf-8")
+    japanese.write_text(build_timed_srt(segments, translations), encoding="utf-8")
 
 
-def upload_caption(youtube: Any, video_id: str, caption: Path) -> str:
+def upload_caption(youtube: Any, video_id: str, caption: Path, language: str = "en", name: str = "English") -> str:
     response = youtube.captions().insert(
         part="snippet",
-        body={"snippet": {"videoId": video_id, "language": "en", "name": "English", "isDraft": False}},
+        body={"snippet": {"videoId": video_id, "language": language, "name": name, "isDraft": False}},
         media_body=MediaFileUpload(str(caption), mimetype="application/octet-stream", resumable=False),
     ).execute()
     caption_id = response.get("id") if isinstance(response, dict) else None
@@ -179,7 +235,19 @@ def upload_caption(youtube: Any, video_id: str, caption: Path) -> str:
     return str(caption_id)
 
 
-def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], config: Mapping[str, Any], root: Path = ROOT) -> str | None:
+def update_caption(youtube: Any, caption_id: str, caption: Path) -> str:
+    response = youtube.captions().update(
+        part="id",
+        body={"id": caption_id},
+        media_body=MediaFileUpload(str(caption), mimetype="application/octet-stream", resumable=False),
+    ).execute()
+    updated_id = response.get("id") if isinstance(response, dict) else None
+    if not updated_id:
+        raise YouTubePublishError("YouTube caption update completed without a caption ID")
+    return str(updated_id)
+
+
+def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], config: Mapping[str, Any], root: Path = ROOT, openai_client: Any | None = None) -> str | None:
     script, audio, metadata_path = generated_paths(episode, root)
     if not audio.is_file() or not script.is_file() or not metadata_path.is_file():
         raise YouTubePublishError(f"Generated podcast assets are missing for {episode.id}")
@@ -193,14 +261,34 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
         print(f"YouTube uploaded: {episode.id} https://youtu.be/{video_id}")
     else:
         print(f"YouTube video fresh: {episode.id} ({video_id})")
-    if not metadata.get("youtube_caption_id"):
-        caption = root / "Podcast" / "YouTube" / f"{episode.slug}.en.srt"
-        create_caption_file(script, audio, caption)
-        caption_id = upload_caption(youtube, str(video_id), caption)
-        metadata.update({"youtube_caption_id": caption_id, "youtube_caption_language": "en"})
-        print(f"YouTube captions uploaded: {episode.id} ({caption_id})")
+    captions_fresh = (
+        metadata.get("youtube_caption_timing") == CAPTION_TIMING_VERSION
+        and metadata.get("youtube_caption_id")
+        and metadata.get("youtube_japanese_caption_id")
+    )
+    if not captions_fresh:
+        client = openai_client or OpenAI()
+        english = root / "Podcast" / "YouTube" / f"{episode.slug}.en.srt"
+        japanese = root / "Podcast" / "YouTube" / f"{episode.slug}.ja.srt"
+        create_synced_caption_files(client, audio, english, japanese)
+        if metadata.get("youtube_caption_id"):
+            caption_id = update_caption(youtube, str(metadata["youtube_caption_id"]), english)
+        else:
+            caption_id = upload_caption(youtube, str(video_id), english, "en", "English")
+        if metadata.get("youtube_japanese_caption_id"):
+            japanese_caption_id = update_caption(youtube, str(metadata["youtube_japanese_caption_id"]), japanese)
+        else:
+            japanese_caption_id = upload_caption(youtube, str(video_id), japanese, "ja", "日本語")
+        metadata.update({
+            "youtube_caption_id": caption_id,
+            "youtube_caption_language": "en",
+            "youtube_japanese_caption_id": japanese_caption_id,
+            "youtube_japanese_caption_language": "ja",
+            "youtube_caption_timing": CAPTION_TIMING_VERSION,
+        })
+        print(f"YouTube synchronized captions uploaded: {episode.id} (en={caption_id}, ja={japanese_caption_id})")
     else:
-        print(f"YouTube captions fresh: {episode.id} ({metadata['youtube_caption_id']})")
+        print(f"YouTube synchronized captions fresh: {episode.id}")
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return str(video_id)
 

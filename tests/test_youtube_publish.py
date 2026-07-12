@@ -10,11 +10,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "Tools"))
 
 from publish_podcast import Episode
 from youtube_publish import (
+    CAPTION_TIMING_VERSION,
     YOUTUBE_CAPTION_SCOPE,
     YouTubeCredentials,
-    build_srt,
+    build_timed_srt,
     render_video,
+    transcribe_segments,
+    translate_segments_to_japanese,
     upload_caption,
+    update_caption,
     upload_video,
     video_body,
 )
@@ -79,11 +83,6 @@ class YouTubePublishingTests(unittest.TestCase):
         with patch("youtube_publish.MediaFileUpload"):
             self.assertEqual(upload_video(youtube, Path("video.mp4"), {"snippet": {}, "status": {}}), "abc123")
 
-    def test_srt_spans_audio_duration(self):
-        srt = build_srt("---\ntitle: Example\n---\nOne two three four five six seven eight.", 8.0)
-        self.assertIn("00:00:00,000 --> 00:00:08,000", srt)
-        self.assertNotIn("title: Example", srt)
-
     def test_caption_upload_returns_caption_id(self):
         youtube = MagicMock()
         youtube.captions.return_value.insert.return_value.execute.return_value = {"id": "caption123"}
@@ -93,6 +92,55 @@ class YouTubePublishingTests(unittest.TestCase):
         body = youtube.captions.return_value.insert.call_args.kwargs["body"]
         self.assertEqual(body["snippet"]["language"], "en")
         self.assertFalse(body["snippet"]["isDraft"])
+
+    def test_transcription_segments_drive_exact_srt_times(self):
+        client = MagicMock()
+        client.audio.transcriptions.create.return_value.segments = [
+            {"start": 1.25, "end": 3.5, "text": "First sentence."},
+            {"start": 4.0, "end": 6.75, "text": "Second sentence."},
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            audio = Path(directory) / "audio.mp3"
+            audio.write_bytes(b"audio")
+            segments = transcribe_segments(client, audio)
+        srt = build_timed_srt(segments)
+        self.assertIn("00:00:01,250 --> 00:00:03,500", srt)
+        self.assertIn("00:00:04,000 --> 00:00:06,750", srt)
+        kwargs = client.audio.transcriptions.create.call_args.kwargs
+        self.assertEqual(kwargs["model"], "whisper-1")
+        self.assertEqual(kwargs["timestamp_granularities"], ["segment"])
+
+    def test_japanese_translation_preserves_segment_ids_and_timing(self):
+        client = MagicMock()
+        client.responses.create.return_value.output_text = json.dumps([
+            {"id": 0, "text": "最初の文です。"},
+            {"id": 1, "text": "次の文です。"},
+        ], ensure_ascii=False)
+        segments = [
+            {"start": 0.2, "end": 1.5, "text": "First."},
+            {"start": 1.8, "end": 3.2, "text": "Second."},
+        ]
+        translated = translate_segments_to_japanese(client, segments, "test-model")
+        srt = build_timed_srt(segments, translated)
+        self.assertIn("最初の文です。", srt)
+        self.assertIn("00:00:01,800 --> 00:00:03,200", srt)
+
+    def test_caption_upload_supports_japanese_and_update(self):
+        youtube = MagicMock()
+        youtube.captions.return_value.insert.return_value.execute.return_value = {"id": "ja123"}
+        youtube.captions.return_value.update.return_value.execute.return_value = {"id": "en123"}
+        with patch("youtube_publish.MediaFileUpload"):
+            self.assertEqual(upload_caption(youtube, "video", Path("ja.srt"), "ja", "日本語"), "ja123")
+            self.assertEqual(update_caption(youtube, "en123", Path("en.srt")), "en123")
+        insert_body = youtube.captions.return_value.insert.call_args.kwargs["body"]
+        self.assertEqual(insert_body["snippet"]["language"], "ja")
+        self.assertEqual(insert_body["snippet"]["name"], "日本語")
+        update_call = youtube.captions.return_value.update.call_args.kwargs
+        self.assertEqual(update_call["part"], "id")
+        self.assertEqual(update_call["body"], {"id": "en123"})
+
+    def test_caption_timing_version_is_explicit(self):
+        self.assertEqual(CAPTION_TIMING_VERSION, "audio-transcription-v1")
 
 
 if __name__ == "__main__":
