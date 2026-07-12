@@ -11,10 +11,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "Tools"))
 from publish_podcast import Episode
 from youtube_publish import (
     CAPTION_TIMING_VERSION,
+    ENGLISH_CAPTION_TEXT_VERSION,
     CAPTION_TRANSLATION_BATCH_SIZE,
     YOUTUBE_CAPTION_SCOPE,
     YouTubeCredentials,
     build_timed_srt,
+    create_synced_caption_files,
     existing_caption_ids,
     normalize_caption_text,
     render_video,
@@ -119,6 +121,20 @@ class YouTubePublishingTests(unittest.TestCase):
         self.assertEqual(normalize_caption_text("INSYNERGY’s work."), "Insynergy’s work.")
         self.assertEqual(normalize_caption_text("Visit insynergy."), "Visit Insynergy.")
 
+    def test_english_only_update_does_not_retranslate_japanese(self):
+        client = MagicMock()
+        client.audio.transcriptions.create.return_value.segments = [
+            {"start": 0.0, "end": 1.0, "text": "InSynergy."},
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            audio = root / "audio.mp3"
+            english = root / "captions.en.srt"
+            audio.write_bytes(b"audio")
+            create_synced_caption_files(client, audio, english)
+            self.assertIn("Insynergy.", english.read_text(encoding="utf-8"))
+        client.responses.create.assert_not_called()
+
     def test_japanese_translation_preserves_segment_ids_and_timing(self):
         client = MagicMock()
         client.responses.create.return_value.output_text = json.dumps({"translations": {
@@ -189,7 +205,8 @@ class YouTubePublishingTests(unittest.TestCase):
         self.assertEqual(update_call["body"], {"id": "en123"})
 
     def test_caption_timing_version_is_explicit(self):
-        self.assertEqual(CAPTION_TIMING_VERSION, "audio-transcription-v2")
+        self.assertEqual(CAPTION_TIMING_VERSION, "audio-transcription-v1")
+        self.assertEqual(ENGLISH_CAPTION_TEXT_VERSION, "insynergy-normalization-v1")
 
     def test_existing_caption_ids_supports_resuming_after_partial_run(self):
         youtube = MagicMock()
