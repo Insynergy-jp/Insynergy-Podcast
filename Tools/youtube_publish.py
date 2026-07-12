@@ -313,6 +313,15 @@ def existing_caption_ids(youtube: Any, video_id: str) -> dict[str, str]:
     return ids
 
 
+def captions_are_fresh(metadata: Mapping[str, Any]) -> bool:
+    return bool(
+        metadata.get("youtube_caption_timing") == CAPTION_TIMING_VERSION
+        and metadata.get("youtube_english_caption_text_version") == ENGLISH_CAPTION_TEXT_VERSION
+        and metadata.get("youtube_caption_id")
+        and metadata.get("youtube_japanese_caption_id")
+    )
+
+
 def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], config: Mapping[str, Any], root: Path = ROOT, openai_client: Any | None = None) -> str | None:
     script, audio, metadata_path = generated_paths(episode, root)
     if not audio.is_file() or not script.is_file() or not metadata_path.is_file():
@@ -327,6 +336,9 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
         print(f"YouTube uploaded: {episode.id} https://youtu.be/{video_id}")
     else:
         print(f"YouTube video fresh: {episode.id} ({video_id})")
+    if captions_are_fresh(metadata):
+        print(f"YouTube synchronized captions fresh: {episode.id}")
+        return str(video_id)
     had_recorded_japanese_caption = bool(metadata.get("youtube_japanese_caption_id"))
     remote_captions = existing_caption_ids(youtube, str(video_id))
     if not metadata.get("youtube_caption_id") and remote_captions.get("en"):
@@ -342,12 +354,7 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
             "youtube_caption_timing": CAPTION_TIMING_VERSION,
         })
         print(f"YouTube synchronized captions recovered: {episode.id}")
-    captions_fresh = (
-        metadata.get("youtube_caption_timing") == CAPTION_TIMING_VERSION
-        and metadata.get("youtube_english_caption_text_version") == ENGLISH_CAPTION_TEXT_VERSION
-        and metadata.get("youtube_caption_id")
-        and metadata.get("youtube_japanese_caption_id")
-    )
+    captions_fresh = captions_are_fresh(metadata)
     if not captions_fresh:
         client = openai_client or OpenAI()
         english = root / "Podcast" / "YouTube" / f"{episode.slug}.en.srt"

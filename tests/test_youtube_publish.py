@@ -16,6 +16,7 @@ from youtube_publish import (
     YOUTUBE_CAPTION_SCOPE,
     YouTubeCredentials,
     build_timed_srt,
+    captions_are_fresh,
     create_synced_caption_files,
     existing_caption_ids,
     normalize_caption_text,
@@ -207,6 +208,19 @@ class YouTubePublishingTests(unittest.TestCase):
     def test_caption_timing_version_is_explicit(self):
         self.assertEqual(CAPTION_TIMING_VERSION, "audio-transcription-v1")
         self.assertEqual(ENGLISH_CAPTION_TEXT_VERSION, "insynergy-normalization-v1")
+
+    def test_fresh_caption_metadata_needs_no_youtube_lookup(self):
+        self.assertTrue(captions_are_fresh({
+            "youtube_caption_timing": CAPTION_TIMING_VERSION,
+            "youtube_english_caption_text_version": ENGLISH_CAPTION_TEXT_VERSION,
+            "youtube_caption_id": "en-id",
+            "youtube_japanese_caption_id": "ja-id",
+        }))
+        self.assertFalse(captions_are_fresh({
+            "youtube_caption_timing": CAPTION_TIMING_VERSION,
+            "youtube_caption_id": "en-id",
+            "youtube_japanese_caption_id": "ja-id",
+        }))
 
     def test_existing_caption_ids_supports_resuming_after_partial_run(self):
         youtube = MagicMock()
