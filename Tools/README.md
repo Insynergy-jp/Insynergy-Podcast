@@ -191,7 +191,9 @@ Podcast生成後、`Tools/youtube_publish.py` はMP3と番組カバーから1920
 - `YOUTUBE_CLIENT_SECRET`
 - `YOUTUBE_REFRESH_TOKEN`
 
-初期値は `private`（非公開）です。YouTube Studioで内容を確認してから公開してください。APIプロジェクトの監査完了後に自動公開する場合は、Repository Variable `YOUTUBE_PRIVACY_STATUS` を `public` または `unlisted` に設定できます。未監査のAPIプロジェクトでは、APIからアップロードした動画が非公開に制限される場合があります。
+初期値は `public`（公開）です。Repository Variable `YOUTUBE_PRIVACY_STATUS` を `private` または `unlisted` に変更すれば、確認後の手動公開運用にも切り替えられます。未監査の外部向けAPIプロジェクトでは、APIからアップロードした動画が非公開に制限される場合があります。
+
+各動画には、生成済みの英語Podcast原稿とMP3の長さからタイムコード付きSRTを作成し、英語字幕トラックとして自動登録します。動画と字幕のIDは `Podcast/Metadata/*.json` に保存されるため、再実行しても重複しません。字幕登録には `youtube.force-ssl` OAuth scopeが必要です。字幕対応前に作成したrefresh tokenは、`Tools/youtube_auth.py` を再実行して更新してください。
 
 ### 初回OAuth設定
 

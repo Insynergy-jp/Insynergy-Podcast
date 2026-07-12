@@ -8,7 +8,7 @@ __pycache__/
 # Temporary podcast build output. Published episode assets are explicitly tracked.
 Podcast/Public/
 Podcast/Audio/*.tmp.mp3
-Podcast/YouTube/*.mp4
+Podcast/YouTube/*
 Tools/client_secret*.json
 Tools/youtube_token*.json
 Podcast/Assets/cover-source.png
