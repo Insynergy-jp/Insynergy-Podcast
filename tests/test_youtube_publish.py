@@ -114,10 +114,10 @@ class YouTubePublishingTests(unittest.TestCase):
 
     def test_japanese_translation_preserves_segment_ids_and_timing(self):
         client = MagicMock()
-        client.responses.create.return_value.output_text = json.dumps([
-            {"id": 0, "text": "最初の文です。"},
-            {"id": 1, "text": "次の文です。"},
-        ], ensure_ascii=False)
+        client.responses.create.return_value.output_text = json.dumps({"translations": {
+            "segment_0": "最初の文です。",
+            "segment_1": "次の文です。",
+        }}, ensure_ascii=False)
         segments = [
             {"start": 0.2, "end": 1.5, "text": "First."},
             {"start": 1.8, "end": 3.2, "text": "Second."},
@@ -126,6 +126,11 @@ class YouTubePublishingTests(unittest.TestCase):
         srt = build_timed_srt(segments, translated)
         self.assertIn("最初の文です。", srt)
         self.assertIn("00:00:01,800 --> 00:00:03,200", srt)
+        request = client.responses.create.call_args.kwargs
+        self.assertEqual(request["text"]["format"]["type"], "json_schema")
+        self.assertTrue(request["text"]["format"]["strict"])
+        translation_schema = request["text"]["format"]["schema"]["properties"]["translations"]
+        self.assertEqual(translation_schema["required"], ["segment_0", "segment_1"])
 
     def test_japanese_translation_is_batched(self):
         client = MagicMock()
@@ -133,11 +138,11 @@ class YouTubePublishingTests(unittest.TestCase):
             {"start": float(index), "end": float(index + 1), "text": f"Segment {index}."}
             for index in range(CAPTION_TRANSLATION_BATCH_SIZE + 1)
         ]
-        first = [{"id": index, "text": f"翻訳{index}"} for index in range(CAPTION_TRANSLATION_BATCH_SIZE)]
-        second = [{"id": 0, "text": "最後の翻訳"}]
+        first = {f"segment_{index}": f"翻訳{index}" for index in range(CAPTION_TRANSLATION_BATCH_SIZE)}
+        second = {"segment_0": "最後の翻訳"}
         client.responses.create.side_effect = [
-            MagicMock(output_text=json.dumps(first, ensure_ascii=False)),
-            MagicMock(output_text=json.dumps(second, ensure_ascii=False)),
+            MagicMock(output_text=json.dumps({"translations": first}, ensure_ascii=False)),
+            MagicMock(output_text=json.dumps({"translations": second}, ensure_ascii=False)),
         ]
         translated = translate_segments_to_japanese(client, segments, "test-model")
         self.assertEqual(len(translated), len(segments))
