@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -39,10 +40,11 @@ class YouTubePublishingTests(unittest.TestCase):
         self.assertIn(YOUTUBE_CAPTION_SCOPE, credentials.google_credentials().scopes)
 
     def test_video_metadata_defaults_to_private(self):
-        body = video_body(
-            self.episode(), {"base_url": "https://example.test"},
-            {"privacy_status": "private", "category_id": "22", "tags": ["Decision Design"]},
-        )
+        with patch.dict(os.environ, {}, clear=True):
+            body = video_body(
+                self.episode(), {"base_url": "https://example.test"},
+                {"privacy_status": "private", "category_id": "22", "tags": ["Decision Design"]},
+            )
         self.assertEqual(body["status"]["privacyStatus"], "private")
         self.assertEqual(body["snippet"]["categoryId"], "22")
         self.assertIn("Podcast RSS", body["snippet"]["description"])
