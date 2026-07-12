@@ -17,6 +17,8 @@ cover: Podcast/Assets/cover.jpg
 id_prefix: DD
 youtube:
   enabled: true
+  delivery: direct_api
+  rss_ingestion: false
   privacy_status: public
   category_id: "22"
   tags:
@@ -24,6 +26,11 @@ youtube:
     - AI governance
     - organizational design
     - Insynergy
+distribution:
+  apple_podcasts: rss
+  spotify: rss
+  amazon_music_audible: rss
+  youtube: direct_api
 voice_profiles:
   executive:
     voice: nova

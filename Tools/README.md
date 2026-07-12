@@ -187,6 +187,15 @@ xmllint --noout Podcast/Public/podcast.xml
 
 Podcast生成後、`Tools/youtube_publish.py` はMP3と番組カバーから1920×1080のMP4を作成し、YouTube Data API v3へアップロードします。`Podcast/podcast.yml` の `youtube.enabled` が有効で、次のGitHub Actions Secretsがすべて設定されている場合だけ実行されます。未設定時はPodcastとPagesの公開を妨げず、安全にスキップします。
 
+### 配信方針（固定）
+
+- Apple Podcasts: RSS配信
+- Spotify: RSS配信
+- Amazon Music / Audible: RSS配信
+- YouTube / YouTube Music: YouTube Data APIによる直接公開
+
+YouTubeのRSS ingestionは使用しません。`Podcast/podcast.yml` の `youtube.delivery: direct_api` と `youtube.rss_ingestion: false` がこの運用方針の編集元です。YouTube StudioへRSSを接続すると同じエピソードが重複するため、RSSフィードは登録しないでください。YouTubeでは、直接公開した動画をPodcast再生リストへ追加してPodcastとして管理します。
+
 - `YOUTUBE_CLIENT_ID`
 - `YOUTUBE_CLIENT_SECRET`
 - `YOUTUBE_REFRESH_TOKEN`

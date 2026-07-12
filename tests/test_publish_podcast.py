@@ -10,6 +10,12 @@ import publish_podcast as pp
 
 
 class PublishingTests(unittest.TestCase):
+    def test_distribution_policy_keeps_youtube_off_rss(self):
+        show = pp.load_show()
+        self.assertEqual(show["distribution"]["youtube"], "direct_api")
+        self.assertEqual(show["youtube"]["delivery"], "direct_api")
+        self.assertFalse(show["youtube"]["rss_ingestion"])
+
     def test_manifest_loads_stable_episode_id(self):
         episodes = pp.load_episodes()
         self.assertEqual(episodes[0].id, "DD-001")
