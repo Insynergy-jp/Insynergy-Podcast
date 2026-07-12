@@ -17,6 +17,7 @@ from youtube_publish import (
     build_timed_srt,
     existing_caption_ids,
     render_video,
+    retry_empty_translation,
     transcribe_segments,
     translate_segments_to_japanese,
     upload_caption,
@@ -148,6 +149,24 @@ class YouTubePublishingTests(unittest.TestCase):
         self.assertEqual(len(translated), len(segments))
         self.assertEqual(translated[-1], "最後の翻訳")
         self.assertEqual(client.responses.create.call_count, 2)
+
+    def test_empty_structured_translation_retries_one_segment(self):
+        client = MagicMock()
+        client.responses.create.side_effect = [
+            MagicMock(output_text=json.dumps({"translations": {"segment_0": ""}}, ensure_ascii=False)),
+            MagicMock(output_text="再試行した翻訳です。"),
+        ]
+        segments = [{"start": 0.0, "end": 1.0, "text": "Retry this."}]
+        self.assertEqual(
+            translate_segments_to_japanese(client, segments, "test-model"),
+            ["再試行した翻訳です。"],
+        )
+        self.assertEqual(client.responses.create.call_count, 2)
+
+    def test_empty_translation_retry_must_return_text(self):
+        client = MagicMock()
+        client.responses.create.return_value.output_text = "Japanese text"
+        self.assertEqual(retry_empty_translation(client, "English text", "model"), "Japanese text")
 
     def test_caption_upload_supports_japanese_and_update(self):
         youtube = MagicMock()

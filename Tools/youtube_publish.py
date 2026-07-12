@@ -172,6 +172,21 @@ def transcribe_segments(client: Any, audio: Path) -> list[dict[str, Any]]:
     return segments
 
 
+def retry_empty_translation(client: Any, text: str, model: str) -> str:
+    prompt = (
+        "Translate this English podcast caption into natural Japanese. "
+        "Return only the non-empty Japanese translation.\n\n" + text
+    )
+    try:
+        response = client.responses.create(model=model, input=prompt)
+    except Exception as exc:
+        raise YouTubePublishError(f"OpenAI Japanese caption retry failed: {exc}") from exc
+    translation = getattr(response, "output_text", None)
+    if not isinstance(translation, str) or not translation.strip():
+        raise YouTubePublishError("Japanese caption translation remained empty after retry")
+    return translation.strip()
+
+
 def translate_segments_to_japanese(client: Any, segments: list[dict[str, Any]], model: str) -> list[str]:
     all_translations: list[str] = []
     for offset in range(0, len(segments), CAPTION_TRANSLATION_BATCH_SIZE):
@@ -222,8 +237,9 @@ def translate_segments_to_japanese(client: Any, segments: list[dict[str, Any]], 
         if not isinstance(translated, dict) or set(translated) != set(keys):
             raise YouTubePublishError("Japanese caption translation changed the segment count")
         by_key = {key: str(translated[key]).strip() for key in keys}
-        if any(not text for text in by_key.values()):
-            raise YouTubePublishError("Japanese caption translation returned missing or empty segments")
+        for index, key in enumerate(keys):
+            if not by_key[key]:
+                by_key[key] = retry_empty_translation(client, str(batch[index]["text"]), model)
         all_translations.extend(by_key[key] for key in keys)
     return all_translations
 
@@ -302,11 +318,21 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
         print(f"YouTube uploaded: {episode.id} https://youtu.be/{video_id}")
     else:
         print(f"YouTube video fresh: {episode.id} ({video_id})")
+    had_recorded_japanese_caption = bool(metadata.get("youtube_japanese_caption_id"))
     remote_captions = existing_caption_ids(youtube, str(video_id))
     if not metadata.get("youtube_caption_id") and remote_captions.get("en"):
         metadata["youtube_caption_id"] = remote_captions["en"]
     if not metadata.get("youtube_japanese_caption_id") and remote_captions.get("ja"):
         metadata["youtube_japanese_caption_id"] = remote_captions["ja"]
+    if not had_recorded_japanese_caption and remote_captions.get("en") and remote_captions.get("ja"):
+        metadata.update({
+            "youtube_caption_id": remote_captions["en"],
+            "youtube_caption_language": "en",
+            "youtube_japanese_caption_id": remote_captions["ja"],
+            "youtube_japanese_caption_language": "ja",
+            "youtube_caption_timing": CAPTION_TIMING_VERSION,
+        })
+        print(f"YouTube synchronized captions recovered: {episode.id}")
     captions_fresh = (
         metadata.get("youtube_caption_timing") == CAPTION_TIMING_VERSION
         and metadata.get("youtube_caption_id")
