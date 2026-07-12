@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -22,6 +23,8 @@ from publish_podcast import ROOT, Episode, generated_paths, load_episodes, load_
 
 
 YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload"
+YOUTUBE_CAPTION_SCOPE = "https://www.googleapis.com/auth/youtube.force-ssl"
+YOUTUBE_SCOPES = [YOUTUBE_UPLOAD_SCOPE, YOUTUBE_CAPTION_SCOPE]
 
 
 class YouTubePublishError(RuntimeError):
@@ -57,7 +60,7 @@ class YouTubeCredentials:
             token_uri=self.token_uri,
             client_id=self.client_id,
             client_secret=self.client_secret,
-            scopes=[YOUTUBE_UPLOAD_SCOPE],
+            scopes=YOUTUBE_SCOPES,
         )
 
 
@@ -100,6 +103,8 @@ def video_body(episode: Episode, show: Mapping[str, Any], config: Mapping[str, A
             "description": description[:5000],
             "tags": [str(tag) for tag in config.get("tags", [])],
             "categoryId": str(config.get("category_id", "22")),
+            "defaultLanguage": "en",
+            "defaultAudioLanguage": "en",
         },
         "status": {
             "privacyStatus": str(os.getenv("YOUTUBE_PRIVACY_STATUS", config.get("privacy_status", "private"))),
@@ -123,21 +128,81 @@ def upload_video(youtube: Any, video: Path, body: Mapping[str, Any]) -> str:
     return str(video_id)
 
 
+def caption_segments(script: str, words_per_segment: int = 12) -> list[str]:
+    script = re.sub(r"\A---.*?---\s*", "", script, flags=re.DOTALL)
+    script = re.sub(r"\s+", " ", script).strip()
+    words = script.split()
+    return [" ".join(words[index:index + words_per_segment]) for index in range(0, len(words), words_per_segment)]
+
+
+def srt_timestamp(seconds: float) -> str:
+    milliseconds = max(0, round(seconds * 1000))
+    hours, remainder = divmod(milliseconds, 3_600_000)
+    minutes, remainder = divmod(remainder, 60_000)
+    secs, millis = divmod(remainder, 1000)
+    return f"{hours:02d}:{minutes:02d}:{secs:02d},{millis:03d}"
+
+
+def build_srt(script: str, duration: float) -> str:
+    segments = caption_segments(script)
+    if not segments or duration <= 0:
+        raise YouTubePublishError("Cannot create captions from an empty script or audio")
+    weights = [max(1, len(segment.split())) for segment in segments]
+    total_weight = sum(weights)
+    elapsed = 0.0
+    blocks = []
+    for index, (segment, weight) in enumerate(zip(segments, weights), start=1):
+        start = elapsed
+        elapsed += duration * weight / total_weight
+        end = duration if index == len(segments) else elapsed
+        blocks.append(f"{index}\n{srt_timestamp(start)} --> {srt_timestamp(end)}\n{segment}")
+    return "\n\n".join(blocks) + "\n"
+
+
+def create_caption_file(script: Path, audio: Path, destination: Path) -> None:
+    if not script.is_file():
+        raise YouTubePublishError(f"Podcast script is missing: {script}")
+    duration = float(MP3(audio).info.length)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(build_srt(script.read_text(encoding="utf-8"), duration), encoding="utf-8")
+
+
+def upload_caption(youtube: Any, video_id: str, caption: Path) -> str:
+    response = youtube.captions().insert(
+        part="snippet",
+        body={"snippet": {"videoId": video_id, "language": "en", "name": "English", "isDraft": False}},
+        media_body=MediaFileUpload(str(caption), mimetype="application/octet-stream", resumable=False),
+    ).execute()
+    caption_id = response.get("id") if isinstance(response, dict) else None
+    if not caption_id:
+        raise YouTubePublishError("YouTube caption upload completed without a caption ID")
+    return str(caption_id)
+
+
 def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], config: Mapping[str, Any], root: Path = ROOT) -> str | None:
-    _, audio, metadata_path = generated_paths(episode, root)
-    if not audio.is_file() or not metadata_path.is_file():
+    script, audio, metadata_path = generated_paths(episode, root)
+    if not audio.is_file() or not script.is_file() or not metadata_path.is_file():
         raise YouTubePublishError(f"Generated podcast assets are missing for {episode.id}")
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
-    if metadata.get("youtube_video_id"):
-        print(f"YouTube fresh: {episode.id} ({metadata['youtube_video_id']})")
-        return None
-    video = root / "Podcast" / "YouTube" / f"{episode.slug}.mp4"
-    render_video(audio, root / str(show["cover"]), video)
-    video_id = upload_video(youtube, video, video_body(episode, show, config))
-    metadata.update({"youtube_video_id": video_id, "youtube_url": f"https://youtu.be/{video_id}"})
+    video_id = metadata.get("youtube_video_id")
+    if not video_id:
+        video = root / "Podcast" / "YouTube" / f"{episode.slug}.mp4"
+        render_video(audio, root / str(show["cover"]), video)
+        video_id = upload_video(youtube, video, video_body(episode, show, config))
+        metadata.update({"youtube_video_id": video_id, "youtube_url": f"https://youtu.be/{video_id}"})
+        print(f"YouTube uploaded: {episode.id} https://youtu.be/{video_id}")
+    else:
+        print(f"YouTube video fresh: {episode.id} ({video_id})")
+    if not metadata.get("youtube_caption_id"):
+        caption = root / "Podcast" / "YouTube" / f"{episode.slug}.en.srt"
+        create_caption_file(script, audio, caption)
+        caption_id = upload_caption(youtube, str(video_id), caption)
+        metadata.update({"youtube_caption_id": caption_id, "youtube_caption_language": "en"})
+        print(f"YouTube captions uploaded: {episode.id} ({caption_id})")
+    else:
+        print(f"YouTube captions fresh: {episode.id} ({metadata['youtube_caption_id']})")
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"YouTube uploaded: {episode.id} https://youtu.be/{video_id}")
-    return video_id
+    return str(video_id)
 
 
 def run(episode_id: str | None = None) -> int:

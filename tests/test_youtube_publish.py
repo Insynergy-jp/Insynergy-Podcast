@@ -8,7 +8,15 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "Tools"))
 
 from publish_podcast import Episode
-from youtube_publish import YouTubeCredentials, render_video, upload_video, video_body
+from youtube_publish import (
+    YOUTUBE_CAPTION_SCOPE,
+    YouTubeCredentials,
+    build_srt,
+    render_video,
+    upload_caption,
+    upload_video,
+    video_body,
+)
 
 
 class YouTubePublishingTests(unittest.TestCase):
@@ -28,6 +36,7 @@ class YouTubePublishingTests(unittest.TestCase):
             "YOUTUBE_REFRESH_TOKEN": "refresh",
         })
         self.assertEqual(credentials.refresh_token, "refresh")
+        self.assertIn(YOUTUBE_CAPTION_SCOPE, credentials.google_credentials().scopes)
 
     def test_video_metadata_defaults_to_private(self):
         body = video_body(
@@ -37,6 +46,7 @@ class YouTubePublishingTests(unittest.TestCase):
         self.assertEqual(body["status"]["privacyStatus"], "private")
         self.assertEqual(body["snippet"]["categoryId"], "22")
         self.assertIn("Podcast RSS", body["snippet"]["description"])
+        self.assertEqual(body["snippet"]["defaultLanguage"], "en")
 
     @patch("youtube_publish.shutil.which", return_value="/usr/bin/ffmpeg")
     @patch("youtube_publish.MP3")
@@ -66,6 +76,21 @@ class YouTubePublishingTests(unittest.TestCase):
         request.next_chunk.side_effect = [(None, None), (None, {"id": "abc123"})]
         with patch("youtube_publish.MediaFileUpload"):
             self.assertEqual(upload_video(youtube, Path("video.mp4"), {"snippet": {}, "status": {}}), "abc123")
+
+    def test_srt_spans_audio_duration(self):
+        srt = build_srt("---\ntitle: Example\n---\nOne two three four five six seven eight.", 8.0)
+        self.assertIn("00:00:00,000 --> 00:00:08,000", srt)
+        self.assertNotIn("title: Example", srt)
+
+    def test_caption_upload_returns_caption_id(self):
+        youtube = MagicMock()
+        youtube.captions.return_value.insert.return_value.execute.return_value = {"id": "caption123"}
+        with patch("youtube_publish.MediaFileUpload"):
+            caption_id = upload_caption(youtube, "video123", Path("captions.srt"))
+        self.assertEqual(caption_id, "caption123")
+        body = youtube.captions.return_value.insert.call_args.kwargs["body"]
+        self.assertEqual(body["snippet"]["language"], "en")
+        self.assertFalse(body["snippet"]["isDraft"])
 
 
 if __name__ == "__main__":
