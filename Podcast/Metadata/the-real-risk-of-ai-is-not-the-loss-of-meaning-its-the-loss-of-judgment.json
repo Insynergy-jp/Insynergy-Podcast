@@ -1,0 +1,21 @@
+{
+  "title": "The Real Risk of AI Is Not the Loss of Meaning — It’s the Loss of Judgment",
+  "source_file": "Insights/The Real Risk of AI Is Not the Loss of Meaning — It’s the Loss of Judgment.md",
+  "script_file": "Podcast/Scripts/the-real-risk-of-ai-is-not-the-loss-of-meaning-its-the-loss-of-judgment-podcast.md",
+  "audio_file": "Podcast/Audio/the-real-risk-of-ai-is-not-the-loss-of-meaning-its-the-loss-of-judgment.mp3",
+  "language": "en",
+  "estimated_duration_minutes": 10,
+  "character_count": 10126,
+  "word_count": 1558,
+  "generated_at": "2026-07-12T02:37:54.562956+00:00",
+  "text_model": "gpt-5.4-mini",
+  "tts_model": "tts-1-hd",
+  "voice": "onyx",
+  "episode_id": "DD-003",
+  "episode": 3,
+  "voice_style": "academic",
+  "source_sha256": "f9d568cb5d417244e7f9f4084e5392013b36c3ee2d057e8f02094f3588cab5d3",
+  "published": "2026-07-12T18:00:00+09:00",
+  "duration_seconds": 627,
+  "public_audio_file": "audio/dd-003-the-real-risk-of-ai-is-not-the-loss-of-meaning-its-the-loss-of-judgment.mp3"
+}
