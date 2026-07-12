@@ -182,3 +182,34 @@ xmllint --noout Podcast/Public/podcast.xml
 ```
 
 原文SHA-256が前回のメタデータと一致するEpisodeは再生成しないため、不要なAPI課金を防止します。全件を意図的に再生成する場合のみActionsの `force_regeneration` を有効にします。
+
+## 13. YouTube Publishing
+
+Podcast生成後、`Tools/youtube_publish.py` はMP3と番組カバーから1920×1080のMP4を作成し、YouTube Data API v3へアップロードします。`Podcast/podcast.yml` の `youtube.enabled` が有効で、次のGitHub Actions Secretsがすべて設定されている場合だけ実行されます。未設定時はPodcastとPagesの公開を妨げず、安全にスキップします。
+
+- `YOUTUBE_CLIENT_ID`
+- `YOUTUBE_CLIENT_SECRET`
+- `YOUTUBE_REFRESH_TOKEN`
+
+初期値は `private`（非公開）です。YouTube Studioで内容を確認してから公開してください。APIプロジェクトの監査完了後に自動公開する場合は、Repository Variable `YOUTUBE_PRIVACY_STATUS` を `public` または `unlisted` に設定できます。未監査のAPIプロジェクトでは、APIからアップロードした動画が非公開に制限される場合があります。
+
+### 初回OAuth設定
+
+1. Google Cloudでプロジェクトを作成し、YouTube Data API v3を有効化します。
+2. OAuth同意画面を設定し、「デスクトップアプリ」のOAuthクライアントJSONをダウンロードします。
+3. ローカルで次を実行し、ブラウザで対象YouTubeチャンネルを承認します。
+
+```bash
+python Tools/youtube_auth.py '/path/to/client_secret.json'
+```
+
+4. 表示された3つの値をGitHub Actions Secretsへ保存します。クライアントJSONとトークンはGitへコミットしないでください。
+
+ローカル実行:
+
+```bash
+python Tools/youtube_publish.py
+python Tools/youtube_publish.py --episode DD-003
+```
+
+アップロード済み動画のIDとURLは各 `Podcast/Metadata/*.json` に保存され、同じエピソードの重複アップロードを防止します。生成MP4は `Podcast/YouTube/` に一時配置され、Gitでは追跡しません。

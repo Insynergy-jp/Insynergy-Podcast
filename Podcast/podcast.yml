@@ -15,6 +15,15 @@ base_url: https://insynergy-jp.github.io/Insynergy-Podcast
 spotify_url: https://open.spotify.com/show/033NAZhO1e0YmeEC9SJISC
 cover: Podcast/Assets/cover.jpg
 id_prefix: DD
+youtube:
+  enabled: true
+  privacy_status: private
+  category_id: "22"
+  tags:
+    - Decision Design
+    - AI governance
+    - organizational design
+    - Insynergy
 voice_profiles:
   executive:
     voice: nova
