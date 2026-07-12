@@ -176,15 +176,38 @@ def translate_segments_to_japanese(client: Any, segments: list[dict[str, Any]], 
     all_translations: list[str] = []
     for offset in range(0, len(segments), CAPTION_TRANSLATION_BATCH_SIZE):
         batch = segments[offset:offset + CAPTION_TRANSLATION_BATCH_SIZE]
-        source = [{"id": index, "text": segment["text"]} for index, segment in enumerate(batch)]
+        keys = [f"segment_{index}" for index in range(len(batch))]
+        source = {key: segment["text"] for key, segment in zip(keys, batch)}
         prompt = (
             "Translate each English podcast caption segment into natural, concise Japanese. "
-            "Preserve names, numbers, meaning, and segment boundaries. Return JSON only as an array "
-            "of objects with integer id and string text, with exactly one item for every input id.\n\n"
+            "Preserve names, numbers, meaning, and segment boundaries. Return exactly one translation "
+            "for every input key.\n\n"
             + json.dumps(source, ensure_ascii=False)
         )
+        schema = {
+            "type": "object",
+            "properties": {
+                "translations": {
+                    "type": "object",
+                    "properties": {key: {"type": "string"} for key in keys},
+                    "required": keys,
+                    "additionalProperties": False,
+                }
+            },
+            "required": ["translations"],
+            "additionalProperties": False,
+        }
         try:
-            response = client.responses.create(model=model, input=prompt)
+            response = client.responses.create(
+                model=model,
+                input=prompt,
+                text={"format": {
+                    "type": "json_schema",
+                    "name": "caption_translations",
+                    "strict": True,
+                    "schema": schema,
+                }},
+            )
         except Exception as exc:
             raise YouTubePublishError(f"OpenAI Japanese caption translation failed: {exc}") from exc
         output = getattr(response, "output_text", None)
@@ -192,18 +215,16 @@ def translate_segments_to_japanese(client: Any, segments: list[dict[str, Any]], 
             raise YouTubePublishError("Japanese caption translation returned no text")
         cleaned = re.sub(r"\A```(?:json)?\s*|\s*```\Z", "", output.strip(), flags=re.IGNORECASE)
         try:
-            translated = json.loads(cleaned)
+            result = json.loads(cleaned)
         except json.JSONDecodeError as exc:
             raise YouTubePublishError("Japanese caption translation returned invalid JSON") from exc
-        if not isinstance(translated, list) or len(translated) != len(batch):
+        translated = result.get("translations") if isinstance(result, dict) else None
+        if not isinstance(translated, dict) or set(translated) != set(keys):
             raise YouTubePublishError("Japanese caption translation changed the segment count")
-        by_id = {
-            item.get("id"): str(item.get("text", "")).strip()
-            for item in translated if isinstance(item, dict) and isinstance(item.get("id"), int)
-        }
-        if set(by_id) != set(range(len(batch))) or any(not text for text in by_id.values()):
+        by_key = {key: str(translated[key]).strip() for key in keys}
+        if any(not text for text in by_key.values()):
             raise YouTubePublishError("Japanese caption translation returned missing or empty segments")
-        all_translations.extend(by_id[index] for index in range(len(batch)))
+        all_translations.extend(by_key[key] for key in keys)
     return all_translations
 
 
