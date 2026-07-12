@@ -21,5 +21,8 @@
   "youtube_video_id": "syZ1FgmD6fM",
   "youtube_url": "https://youtu.be/syZ1FgmD6fM",
   "youtube_caption_id": "AUieDabDrURHO93kh3cxzU6WgPyZKZmo6A_ypHYrhTjotPiMIn2JevpZ",
-  "youtube_caption_language": "en"
+  "youtube_caption_language": "en",
+  "youtube_japanese_caption_id": "AUieDaY7y8A0lC9F7X4pYWpE4O3c0Tu3wQ7C2we1pJmeOrQzqQOd1qkhbS0",
+  "youtube_japanese_caption_language": "ja",
+  "youtube_caption_timing": "audio-transcription-v1"
 }

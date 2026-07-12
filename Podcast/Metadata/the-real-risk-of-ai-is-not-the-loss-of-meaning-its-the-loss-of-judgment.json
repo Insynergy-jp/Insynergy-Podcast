@@ -21,5 +21,8 @@
   "youtube_video_id": "eThIkaOb-Rg",
   "youtube_url": "https://youtu.be/eThIkaOb-Rg",
   "youtube_caption_id": "AUieDaah-DRZj-DL9ggJJLZEaVQLN9UMtKxEIkPbFctE3V7EgfPUGXto",
-  "youtube_caption_language": "en"
+  "youtube_caption_language": "en",
+  "youtube_japanese_caption_id": "AUieDaZkgIVBI4ywurrwAa57RljVCeTeDhu1r4xBBjdgmXDHzLL4Sx7fVj8",
+  "youtube_japanese_caption_language": "ja",
+  "youtube_caption_timing": "audio-transcription-v1"
 }
