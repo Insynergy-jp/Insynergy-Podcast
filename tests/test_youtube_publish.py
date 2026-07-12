@@ -11,9 +11,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "Tools"))
 from publish_podcast import Episode
 from youtube_publish import (
     CAPTION_TIMING_VERSION,
+    CAPTION_TRANSLATION_BATCH_SIZE,
     YOUTUBE_CAPTION_SCOPE,
     YouTubeCredentials,
     build_timed_srt,
+    existing_caption_ids,
     render_video,
     transcribe_segments,
     translate_segments_to_japanese,
@@ -125,6 +127,23 @@ class YouTubePublishingTests(unittest.TestCase):
         self.assertIn("最初の文です。", srt)
         self.assertIn("00:00:01,800 --> 00:00:03,200", srt)
 
+    def test_japanese_translation_is_batched(self):
+        client = MagicMock()
+        segments = [
+            {"start": float(index), "end": float(index + 1), "text": f"Segment {index}."}
+            for index in range(CAPTION_TRANSLATION_BATCH_SIZE + 1)
+        ]
+        first = [{"id": index, "text": f"翻訳{index}"} for index in range(CAPTION_TRANSLATION_BATCH_SIZE)]
+        second = [{"id": 0, "text": "最後の翻訳"}]
+        client.responses.create.side_effect = [
+            MagicMock(output_text=json.dumps(first, ensure_ascii=False)),
+            MagicMock(output_text=json.dumps(second, ensure_ascii=False)),
+        ]
+        translated = translate_segments_to_japanese(client, segments, "test-model")
+        self.assertEqual(len(translated), len(segments))
+        self.assertEqual(translated[-1], "最後の翻訳")
+        self.assertEqual(client.responses.create.call_count, 2)
+
     def test_caption_upload_supports_japanese_and_update(self):
         youtube = MagicMock()
         youtube.captions.return_value.insert.return_value.execute.return_value = {"id": "ja123"}
@@ -141,6 +160,18 @@ class YouTubePublishingTests(unittest.TestCase):
 
     def test_caption_timing_version_is_explicit(self):
         self.assertEqual(CAPTION_TIMING_VERSION, "audio-transcription-v1")
+
+    def test_existing_caption_ids_supports_resuming_after_partial_run(self):
+        youtube = MagicMock()
+        youtube.captions.return_value.list.return_value.execute.return_value = {"items": [
+            {"id": "english-id", "snippet": {"language": "en", "name": "English"}},
+            {"id": "japanese-id", "snippet": {"language": "ja", "name": "日本語"}},
+            {"id": "automatic", "snippet": {"language": "en", "name": ""}},
+        ]}
+        self.assertEqual(
+            existing_caption_ids(youtube, "video-id"),
+            {"en": "english-id", "ja": "japanese-id"},
+        )
 
 
 if __name__ == "__main__":
