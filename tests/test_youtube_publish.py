@@ -16,6 +16,7 @@ from youtube_publish import (
     YouTubeCredentials,
     build_timed_srt,
     existing_caption_ids,
+    normalize_caption_text,
     render_video,
     retry_empty_translation,
     transcribe_segments,
@@ -113,6 +114,11 @@ class YouTubePublishingTests(unittest.TestCase):
         self.assertEqual(kwargs["model"], "whisper-1")
         self.assertEqual(kwargs["timestamp_granularities"], ["segment"])
 
+    def test_brand_name_is_normalized_in_english_captions(self):
+        self.assertEqual(normalize_caption_text("InSynergy builds systems."), "Insynergy builds systems.")
+        self.assertEqual(normalize_caption_text("INSYNERGY’s work."), "Insynergy’s work.")
+        self.assertEqual(normalize_caption_text("Visit insynergy."), "Visit Insynergy.")
+
     def test_japanese_translation_preserves_segment_ids_and_timing(self):
         client = MagicMock()
         client.responses.create.return_value.output_text = json.dumps({"translations": {
@@ -183,7 +189,7 @@ class YouTubePublishingTests(unittest.TestCase):
         self.assertEqual(update_call["body"], {"id": "en123"})
 
     def test_caption_timing_version_is_explicit(self):
-        self.assertEqual(CAPTION_TIMING_VERSION, "audio-transcription-v1")
+        self.assertEqual(CAPTION_TIMING_VERSION, "audio-transcription-v2")
 
     def test_existing_caption_ids_supports_resuming_after_partial_run(self):
         youtube = MagicMock()
