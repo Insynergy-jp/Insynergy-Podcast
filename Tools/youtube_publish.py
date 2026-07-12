@@ -26,7 +26,8 @@ from publish_podcast import ROOT, Episode, generated_paths, load_episodes, load_
 YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload"
 YOUTUBE_CAPTION_SCOPE = "https://www.googleapis.com/auth/youtube.force-ssl"
 YOUTUBE_SCOPES = [YOUTUBE_UPLOAD_SCOPE, YOUTUBE_CAPTION_SCOPE]
-CAPTION_TIMING_VERSION = "audio-transcription-v2"
+CAPTION_TIMING_VERSION = "audio-transcription-v1"
+ENGLISH_CAPTION_TEXT_VERSION = "insynergy-normalization-v1"
 CAPTION_TRANSCRIPTION_MODEL = "whisper-1"
 DEFAULT_CAPTION_TRANSLATION_MODEL = "gpt-5.4-mini"
 CAPTION_TRANSLATION_BATCH_SIZE = 20
@@ -261,13 +262,16 @@ def build_timed_srt(segments: list[dict[str, Any]], texts: list[str] | None = No
     return "\n\n".join(blocks) + "\n"
 
 
-def create_synced_caption_files(client: Any, audio: Path, english: Path, japanese: Path) -> None:
+def create_synced_caption_files(
+    client: Any, audio: Path, english: Path, japanese: Path | None = None
+) -> None:
     segments = transcribe_segments(client, audio)
-    model = os.getenv("OPENAI_CAPTION_TRANSLATION_MODEL", DEFAULT_CAPTION_TRANSLATION_MODEL)
-    translations = translate_segments_to_japanese(client, segments, model)
     english.parent.mkdir(parents=True, exist_ok=True)
     english.write_text(build_timed_srt(segments), encoding="utf-8")
-    japanese.write_text(build_timed_srt(segments, translations), encoding="utf-8")
+    if japanese is not None:
+        model = os.getenv("OPENAI_CAPTION_TRANSLATION_MODEL", DEFAULT_CAPTION_TRANSLATION_MODEL)
+        translations = translate_segments_to_japanese(client, segments, model)
+        japanese.write_text(build_timed_srt(segments, translations), encoding="utf-8")
 
 
 def upload_caption(youtube: Any, video_id: str, caption: Path, language: str = "en", name: str = "English") -> str:
@@ -340,6 +344,7 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
         print(f"YouTube synchronized captions recovered: {episode.id}")
     captions_fresh = (
         metadata.get("youtube_caption_timing") == CAPTION_TIMING_VERSION
+        and metadata.get("youtube_english_caption_text_version") == ENGLISH_CAPTION_TEXT_VERSION
         and metadata.get("youtube_caption_id")
         and metadata.get("youtube_japanese_caption_id")
     )
@@ -347,21 +352,33 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
         client = openai_client or OpenAI()
         english = root / "Podcast" / "YouTube" / f"{episode.slug}.en.srt"
         japanese = root / "Podcast" / "YouTube" / f"{episode.slug}.ja.srt"
-        create_synced_caption_files(client, audio, english, japanese)
-        if metadata.get("youtube_caption_id"):
+        needs_timing_migration = metadata.get("youtube_caption_timing") != CAPTION_TIMING_VERSION
+        needs_english_update = (
+            needs_timing_migration
+            or metadata.get("youtube_english_caption_text_version") != ENGLISH_CAPTION_TEXT_VERSION
+            or not metadata.get("youtube_caption_id")
+        )
+        needs_japanese_update = needs_timing_migration or not metadata.get("youtube_japanese_caption_id")
+        create_synced_caption_files(client, audio, english, japanese if needs_japanese_update else None)
+        if metadata.get("youtube_caption_id") and needs_english_update:
             caption_id = update_caption(youtube, str(metadata["youtube_caption_id"]), english)
-        else:
+        elif not metadata.get("youtube_caption_id"):
             caption_id = upload_caption(youtube, str(video_id), english, "en", "English")
-        if metadata.get("youtube_japanese_caption_id"):
-            japanese_caption_id = update_caption(youtube, str(metadata["youtube_japanese_caption_id"]), japanese)
         else:
+            caption_id = str(metadata["youtube_caption_id"])
+        if metadata.get("youtube_japanese_caption_id") and needs_japanese_update:
+            japanese_caption_id = update_caption(youtube, str(metadata["youtube_japanese_caption_id"]), japanese)
+        elif not metadata.get("youtube_japanese_caption_id"):
             japanese_caption_id = upload_caption(youtube, str(video_id), japanese, "ja", "日本語")
+        else:
+            japanese_caption_id = str(metadata["youtube_japanese_caption_id"])
         metadata.update({
             "youtube_caption_id": caption_id,
             "youtube_caption_language": "en",
             "youtube_japanese_caption_id": japanese_caption_id,
             "youtube_japanese_caption_language": "ja",
             "youtube_caption_timing": CAPTION_TIMING_VERSION,
+            "youtube_english_caption_text_version": ENGLISH_CAPTION_TEXT_VERSION,
         })
         print(f"YouTube synchronized captions uploaded: {episode.id} (en={caption_id}, ja={japanese_caption_id})")
     else:
