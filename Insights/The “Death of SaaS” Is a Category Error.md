@@ -1,3 +1,7 @@
+---
+slug: the-death-of-saas-is-a-category-error
+---
+
 # The “Death of SaaS” Is a Category Error
 
 ## Introduction: A Narrative That Almost Makes Sense
