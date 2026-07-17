@@ -24,5 +24,6 @@
   "youtube_caption_language": "en",
   "youtube_japanese_caption_id": "AUieDaY7y8A0lC9F7X4pYWpE4O3c0Tu3wQ7C2we1pJmeOrQzqQOd1qkhbS0",
   "youtube_japanese_caption_language": "ja",
-  "youtube_caption_timing": "audio-transcription-v1"
+  "youtube_caption_timing": "audio-transcription-v1",
+  "youtube_english_caption_text_version": "insynergy-normalization-v1"
 }
