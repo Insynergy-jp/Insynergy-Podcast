@@ -13,6 +13,21 @@ on:
       - ".github/workflows/publish-podcast.yml"
   workflow_dispatch:
     inputs:
+      generation_only:
+        description: Generate one podcast artifact without publishing it
+        required: true
+        default: false
+        type: boolean
+      source_path:
+        description: Repository-relative Markdown path used when generation_only is enabled
+        required: false
+        default: ""
+        type: string
+      duration_minutes:
+        description: Target duration used when generation_only is enabled
+        required: false
+        default: "10"
+        type: string
       force_regeneration:
         description: Regenerate all published episodes even if source is unchanged
         required: true
@@ -62,18 +77,34 @@ jobs:
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
 
+      - name: Generate one unpublished podcast artifact
+        if: ${{ inputs.generation_only }}
+        env:
+          SOURCE_PATH: ${{ inputs.source_path }}
+          DURATION_MINUTES: ${{ inputs.duration_minutes }}
+          OBSIDIAN_VAULT_PATH: ${{ github.workspace }}
+          INSIGHTS_DIRECTORY: Insights
+        run: |
+          case "$SOURCE_PATH" in
+            Insights/*.md) ;;
+            *) echo "source_path must match Insights/*.md" >&2; exit 2 ;;
+          esac
+          python Tools/generate_podcast.py "$SOURCE_PATH" --duration "$DURATION_MINUTES"
+
       - name: Build changed episodes
-        if: ${{ !inputs.force_regeneration }}
+        if: ${{ !inputs.generation_only && !inputs.force_regeneration }}
         run: python Tools/run_pipeline.py --strict-email
 
       - name: Force-build all episodes
-        if: ${{ inputs.force_regeneration }}
+        if: ${{ !inputs.generation_only && inputs.force_regeneration }}
         run: python Tools/run_pipeline.py --strict-email --force
 
       - name: Publish missing episodes to YouTube
+        if: ${{ !inputs.generation_only }}
         run: python Tools/youtube_publish.py
 
       - name: Commit durable episode outputs
+        if: ${{ !inputs.generation_only }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -98,14 +129,17 @@ jobs:
           retention-days: 30
 
       - name: Configure GitHub Pages
+        if: ${{ !inputs.generation_only }}
         uses: actions/configure-pages@v5
 
       - name: Upload GitHub Pages artifact
+        if: ${{ !inputs.generation_only }}
         uses: actions/upload-pages-artifact@v4
         with:
           path: Podcast/Public
 
   deploy:
+    if: ${{ !inputs.generation_only }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
