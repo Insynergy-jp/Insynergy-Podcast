@@ -57,6 +57,18 @@ class PodcastTests(unittest.TestCase):
         with self.assertRaisesRegex(gp.PodcastError, "empty script"):
             gp.generate_script(client, "model", "prompt")
 
+    def test_condense_prompt_sets_a_hard_word_limit(self):
+        prompt = gp.build_condense_prompt("Original narration", {"title": "Title"}, 10, "academic")
+        self.assertIn("Target length: 1400 words", prompt)
+        self.assertIn("Required range: 1260 to 1540 words", prompt)
+        self.assertIn("Do not exceed 1540 words", prompt)
+        self.assertIn("Voice style: academic", prompt)
+
+    def test_only_overlong_scripts_trigger_revision(self):
+        self.assertTrue(gp.should_retry_overlong(["Script is too long (2800 words; expected roughly 1400)."]))
+        self.assertFalse(gp.should_retry_overlong(["Script is too short (200 words; expected roughly 1400)."]))
+        self.assertFalse(gp.should_retry_overlong(["Too many Markdown/list markers remain in the narration."]))
+
     def test_metadata_json(self):
         vault = Path("/vault")
         source = vault / "Insights" / "note.md"
