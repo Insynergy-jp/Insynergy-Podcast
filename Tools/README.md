@@ -213,6 +213,15 @@ YouTubeのRSS ingestionは使用しません。`Podcast/podcast.yml` の `youtub
 
 初期値は `public`（公開）です。Repository Variable `YOUTUBE_PRIVACY_STATUS` を `private` または `unlisted` に変更すれば、確認後の手動公開運用にも切り替えられます。未監査の外部向けAPIプロジェクトでは、APIからアップロードした動画が非公開に制限される場合があります。
 
+YouTube動画の静止画とカスタムサムネイルには、対応する
+`https://insynergy.io/insights/<slug>` ページの `og:image` を使用します。取得した画像は
+1280×720のJPEGへ変換し、YouTubeの2MB制限以内になるまで圧縮します。Insight側のslugが
+Podcastのslugと異なる場合は、`Podcast/podcast.yml` の
+`youtube.insight_urls` にPodcast slugと正しい記事URLの対応を追加してください。記事ページまたは
+OG画像を取得できない場合は、公開処理を止めずに従来のPodcastカバーへフォールバックします。
+既存動画も、メタデータに `youtube_thumbnail_version` がない場合は動画を再アップロードせず、
+カスタムサムネイルだけを更新します。
+
 各動画には、最終MP3を `whisper-1` で文字起こしして得た発話区間タイムスタンプから英語SRTを作成します。原稿の文字数を音声全体へ均等配分しないため、発話速度やポーズに字幕表示が追従します。文字起こし時の大文字化にかかわらず、ブランド名は常に `Insynergy` へ正規化します。さらに各英語区間を小分けにして同じ区間境界のまま日本語へ翻訳し、英語・日本語の2トラックを自動登録します。既存の英語字幕は更新し、日本語字幕だけを追加するため、動画や字幕トラックを重複作成しません。処理再開時にはYouTube上の既存トラックも照合します。動画と字幕のIDは `Podcast/Metadata/*.json` に保存されます。字幕登録には `youtube.force-ssl` OAuth scopeが必要です。字幕対応前に作成したrefresh tokenは、`Tools/youtube_auth.py` を再実行して更新してください。
 
 字幕文字起こしモデルは `whisper-1`、日本語翻訳モデルは既定で `gpt-5.4-mini` です。翻訳モデルだけを変更する場合はRepository Variableまたは環境変数 `OPENAI_CAPTION_TRANSLATION_MODEL` を設定します。

@@ -13,15 +13,22 @@ from youtube_publish import (
     CAPTION_TIMING_VERSION,
     ENGLISH_CAPTION_TEXT_VERSION,
     CAPTION_TRANSLATION_BATCH_SIZE,
+    OG_THUMBNAIL_VERSION,
     YOUTUBE_CAPTION_SCOPE,
     YouTubeCredentials,
     build_timed_srt,
     captions_are_fresh,
     create_synced_caption_files,
     existing_caption_ids,
+    fetch_insight_og_image,
+    insight_url,
     normalize_caption_text,
+    prepare_thumbnail,
+    publish_episode,
     render_video,
     retry_empty_translation,
+    set_video_thumbnail,
+    thumbnail_is_fresh,
     transcribe_segments,
     translate_segments_to_japanese,
     upload_caption,
@@ -82,6 +89,128 @@ class YouTubePublishingTests(unittest.TestCase):
             self.assertIn("libx264", command)
             self.assertIn("aac", command)
             self.assertIn("8.250", command)
+            self.assertIn("scale=1920:1080", command[command.index("-filter_complex") + 1])
+
+    def test_insight_url_uses_slug_and_supports_explicit_override(self):
+        episode = self.episode()
+        self.assertEqual(
+            insight_url(episode, {}),
+            "https://insynergy.io/insights/judgment-not-meaning",
+        )
+        self.assertEqual(
+            insight_url(episode, {"insight_urls": {
+                "judgment-not-meaning": "https://insynergy.io/insights/custom-slug",
+            }}),
+            "https://insynergy.io/insights/custom-slug",
+        )
+
+    def test_fetches_og_image_from_insight_page(self):
+        class Response:
+            def __init__(self, data, content_type):
+                self.data = data
+                self.headers = {"Content-Type": content_type}
+
+            def read(self, _size):
+                return self.data
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+        html = (
+            b'<html><head><meta content="https://images.example.test/og&amp;v=1.png" '
+            b'property="og:image"></head></html>'
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory) / "og-image"
+            with patch("youtube_publish.urlopen", side_effect=[
+                Response(html, "text/html; charset=utf-8"),
+                Response(b"image bytes", "image/png"),
+            ]):
+                page_url, image_url = fetch_insight_og_image(self.episode(), {}, destination)
+            self.assertEqual(page_url, "https://insynergy.io/insights/judgment-not-meaning")
+            self.assertEqual(image_url, "https://images.example.test/og&v=1.png")
+            self.assertEqual(destination.read_bytes(), b"image bytes")
+
+    @patch("youtube_publish.shutil.which", return_value="/usr/bin/ffmpeg")
+    @patch("youtube_publish.subprocess.run")
+    def test_thumbnail_is_converted_to_16_by_9_jpeg_under_limit(self, run, _which):
+        run.return_value.returncode = 0
+        run.return_value.stderr = ""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.png"
+            destination = root / "thumbnail.jpg"
+            source.write_bytes(b"image")
+
+            def create_output(command, **_kwargs):
+                destination.write_bytes(b"jpeg")
+                return run.return_value
+
+            run.side_effect = create_output
+            prepare_thumbnail(source, destination)
+            command = run.call_args.args[0]
+            filter_value = command[command.index("-vf") + 1]
+            self.assertIn("scale=1280:720", filter_value)
+            self.assertIn("pad=1280:720", filter_value)
+            self.assertEqual(destination.read_bytes(), b"jpeg")
+
+    def test_custom_thumbnail_is_uploaded_and_versioned(self):
+        youtube = MagicMock()
+        with patch("youtube_publish.MediaFileUpload"):
+            set_video_thumbnail(youtube, "video123", Path("thumbnail.jpg"))
+        youtube.thumbnails.return_value.set.assert_called_once()
+        kwargs = youtube.thumbnails.return_value.set.call_args.kwargs
+        self.assertEqual(kwargs["videoId"], "video123")
+        self.assertTrue(thumbnail_is_fresh({
+            "youtube_thumbnail_version": OG_THUMBNAIL_VERSION,
+            "youtube_thumbnail_insight_url": "https://insynergy.io/insights/example",
+            "youtube_thumbnail_source_url": "https://images.example.test/example.png",
+        }))
+        self.assertFalse(thumbnail_is_fresh({}))
+
+    def test_existing_video_gets_og_thumbnail_without_reupload(self):
+        episode = self.episode()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            scripts = root / "Podcast" / "Scripts"
+            audio = root / "Podcast" / "Audio"
+            metadata = root / "Podcast" / "Metadata"
+            scripts.mkdir(parents=True)
+            audio.mkdir(parents=True)
+            metadata.mkdir(parents=True)
+            (scripts / f"{episode.slug}-podcast.md").write_text("script", encoding="utf-8")
+            (audio / f"{episode.slug}.mp3").write_bytes(b"audio")
+            metadata_path = metadata / f"{episode.slug}.json"
+            metadata_path.write_text(json.dumps({
+                "youtube_video_id": "existing-video",
+                "youtube_caption_timing": CAPTION_TIMING_VERSION,
+                "youtube_english_caption_text_version": ENGLISH_CAPTION_TEXT_VERSION,
+                "youtube_caption_id": "en-id",
+                "youtube_japanese_caption_id": "ja-id",
+            }), encoding="utf-8")
+            with (
+                patch("youtube_publish.fetch_insight_og_image", return_value=(
+                    "https://insynergy.io/insights/judgment-not-meaning",
+                    "https://images.example.test/og.png",
+                )),
+                patch("youtube_publish.prepare_thumbnail"),
+                patch("youtube_publish.set_video_thumbnail") as set_thumbnail,
+                patch("youtube_publish.upload_video") as upload,
+            ):
+                video_id = publish_episode(
+                    MagicMock(), episode, {"cover": "Podcast/Assets/cover.jpg"}, {}, root
+                )
+            self.assertEqual(video_id, "existing-video")
+            upload.assert_not_called()
+            set_thumbnail.assert_called_once()
+            saved = json.loads(metadata_path.read_text(encoding="utf-8"))
+            self.assertEqual(saved["youtube_thumbnail_version"], OG_THUMBNAIL_VERSION)
+            self.assertEqual(
+                saved["youtube_thumbnail_source_url"], "https://images.example.test/og.png"
+            )
 
     def test_resumable_upload_returns_video_id(self):
         youtube = MagicMock()
