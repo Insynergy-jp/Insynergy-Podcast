@@ -21,5 +21,14 @@
   "youtube_video_id": "OXF7nVRN2kQ",
   "youtube_url": "https://youtu.be/OXF7nVRN2kQ",
   "youtube_description_version": "insynergy-insight-description-v1",
-  "youtube_description_insight_url": "https://insynergy.io/insights/when-software-stops-being-the-place-where-work-happens"
+  "youtube_description_insight_url": "https://insynergy.io/insights/when-software-stops-being-the-place-where-work-happens",
+  "youtube_thumbnail_version": "insynergy-insight-og-v1",
+  "youtube_thumbnail_insight_url": "https://insynergy.io/insights/when-software-stops-being-the-place-where-work-happens",
+  "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/560fed026fe3434eb4fff30a4fdc6269/when-software-stops-being-the-place-where-work-happens.png",
+  "youtube_caption_id": "AUieDaaY7zUgMViivCRu1Etp9wu5nDkm1nbW9qDaD5BuPYBLNvQL1RAx",
+  "youtube_caption_language": "en",
+  "youtube_japanese_caption_id": "AUieDaajZttGO1Jgjz8DfWV71N3VaZuNMxrYIcabTVA8ScYlfdeHHefvGhU",
+  "youtube_japanese_caption_language": "ja",
+  "youtube_caption_timing": "audio-transcription-v1",
+  "youtube_english_caption_text_version": "insynergy-normalization-v1"
 }
