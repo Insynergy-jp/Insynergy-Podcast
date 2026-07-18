@@ -21,6 +21,10 @@ class PublishingTests(unittest.TestCase):
         self.assertEqual(episodes[0].id, "DD-001")
         self.assertEqual(episodes[0].voice_style, "executive")
 
+    def test_manifest_can_seed_an_existing_youtube_video(self):
+        episode = next(ep for ep in pp.load_episodes() if ep.id == "DD-017")
+        self.assertEqual(episode.youtube_video_id, "OXF7nVRN2kQ")
+
     def test_feed_contains_immutable_guid_and_enclosure(self):
         episode = pp.load_episodes()[0]
         show = pp.load_show()

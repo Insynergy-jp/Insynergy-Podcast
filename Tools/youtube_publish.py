@@ -465,6 +465,16 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
         raise YouTubePublishError(f"Generated podcast assets are missing for {episode.id}")
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     video_id = metadata.get("youtube_video_id")
+    if not video_id and episode.youtube_video_id:
+        video_id = episode.youtube_video_id
+        metadata.update({
+            "youtube_video_id": video_id,
+            "youtube_url": f"https://youtu.be/{video_id}",
+        })
+        metadata_path.write_text(
+            json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        print(f"YouTube video recovered: {episode.id} ({video_id})")
     article_url = insight_url(episode, config)
     details = video_body(episode, show, config)
     thumbnail: Path | None = None
@@ -491,6 +501,9 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
             "youtube_description_version": YOUTUBE_DESCRIPTION_VERSION,
             "youtube_description_insight_url": article_url,
         })
+        metadata_path.write_text(
+            json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
         print(f"YouTube uploaded: {episode.id} https://youtu.be/{video_id}")
     else:
         print(f"YouTube video fresh: {episode.id} ({video_id})")
@@ -500,6 +513,9 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
                 "youtube_description_version": YOUTUBE_DESCRIPTION_VERSION,
                 "youtube_description_insight_url": article_url,
             })
+            metadata_path.write_text(
+                json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+            )
             print(f"YouTube description updated: {episode.id} ({article_url})")
     if thumbnail and thumbnail_page_url and thumbnail_source_url:
         try:
@@ -512,6 +528,9 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
                 "youtube_thumbnail_insight_url": thumbnail_page_url,
                 "youtube_thumbnail_source_url": thumbnail_source_url,
             })
+            metadata_path.write_text(
+                json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+            )
             print(f"YouTube Insight thumbnail updated: {episode.id} ({thumbnail_source_url})")
     if captions_are_fresh(metadata):
         print(f"YouTube synchronized captions fresh: {episode.id}")
