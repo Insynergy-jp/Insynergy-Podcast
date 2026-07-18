@@ -224,6 +224,8 @@ OG画像を取得できない場合は、公開処理を止めずに従来のPod
 
 各動画には、最終MP3を `whisper-1` で文字起こしして得た発話区間タイムスタンプから英語SRTを作成します。原稿の文字数を音声全体へ均等配分しないため、発話速度やポーズに字幕表示が追従します。文字起こし時の大文字化にかかわらず、ブランド名は常に `Insynergy` へ正規化します。さらに各英語区間を小分けにして同じ区間境界のまま日本語へ翻訳し、英語・日本語の2トラックを自動登録します。既存の英語字幕は更新し、日本語字幕だけを追加するため、動画や字幕トラックを重複作成しません。処理再開時にはYouTube上の既存トラックも照合します。動画と字幕のIDは `Podcast/Metadata/*.json` に保存されます。字幕登録には `youtube.force-ssl` OAuth scopeが必要です。字幕対応前に作成したrefresh tokenは、`Tools/youtube_auth.py` を再実行して更新してください。
 
+YouTube動画の説明欄には、Episode概要、対応する `insynergy.io/insights` の記事URL、Podcastサイト、RSSを自動記載します。説明欄のバージョンと記事URLはEpisode metadataへ保存され、既存動画は再アップロードせず `videos.update` で説明欄だけを同期します。
+
 字幕文字起こしモデルは `whisper-1`、日本語翻訳モデルは既定で `gpt-5.4-mini` です。翻訳モデルだけを変更する場合はRepository Variableまたは環境変数 `OPENAI_CAPTION_TRANSLATION_MODEL` を設定します。
 
 ### 初回OAuth設定

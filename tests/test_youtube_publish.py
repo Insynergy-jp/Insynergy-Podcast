@@ -14,11 +14,13 @@ from youtube_publish import (
     ENGLISH_CAPTION_TEXT_VERSION,
     CAPTION_TRANSLATION_BATCH_SIZE,
     OG_THUMBNAIL_VERSION,
+    YOUTUBE_DESCRIPTION_VERSION,
     YOUTUBE_CAPTION_SCOPE,
     YouTubeCredentials,
     build_timed_srt,
     captions_are_fresh,
     create_synced_caption_files,
+    description_is_fresh,
     existing_caption_ids,
     fetch_insight_og_image,
     insight_url,
@@ -33,6 +35,7 @@ from youtube_publish import (
     translate_segments_to_japanese,
     upload_caption,
     update_caption,
+    update_video_details,
     upload_video,
     video_body,
 )
@@ -65,6 +68,11 @@ class YouTubePublishingTests(unittest.TestCase):
             )
         self.assertEqual(body["status"]["privacyStatus"], "private")
         self.assertEqual(body["snippet"]["categoryId"], "22")
+        self.assertIn("Episode overview", body["snippet"]["description"])
+        self.assertIn(
+            "https://insynergy.io/insights/judgment-not-meaning",
+            body["snippet"]["description"],
+        )
         self.assertIn("Podcast RSS", body["snippet"]["description"])
         self.assertEqual(body["snippet"]["defaultLanguage"], "en")
 
@@ -171,6 +179,26 @@ class YouTubePublishingTests(unittest.TestCase):
         }))
         self.assertFalse(thumbnail_is_fresh({}))
 
+    def test_existing_video_description_is_updated_without_reupload(self):
+        youtube = MagicMock()
+        body = video_body(
+            self.episode(),
+            {"base_url": "https://example.test"},
+            {"category_id": "22"},
+        )
+        update_video_details(youtube, "video123", body)
+        youtube.videos.return_value.update.assert_called_once()
+        kwargs = youtube.videos.return_value.update.call_args.kwargs
+        self.assertEqual(kwargs["part"], "snippet")
+        self.assertEqual(kwargs["body"]["id"], "video123")
+        self.assertIn("Episode overview", kwargs["body"]["snippet"]["description"])
+        article_url = "https://insynergy.io/insights/judgment-not-meaning"
+        self.assertTrue(description_is_fresh({
+            "youtube_description_version": YOUTUBE_DESCRIPTION_VERSION,
+            "youtube_description_insight_url": article_url,
+        }, article_url))
+        self.assertFalse(description_is_fresh({}, article_url))
+
     def test_existing_video_gets_og_thumbnail_without_reupload(self):
         episode = self.episode()
         with tempfile.TemporaryDirectory() as directory:
@@ -199,14 +227,24 @@ class YouTubePublishingTests(unittest.TestCase):
                 patch("youtube_publish.prepare_thumbnail"),
                 patch("youtube_publish.set_video_thumbnail") as set_thumbnail,
                 patch("youtube_publish.upload_video") as upload,
+                patch("youtube_publish.update_video_details") as update_details,
             ):
                 video_id = publish_episode(
-                    MagicMock(), episode, {"cover": "Podcast/Assets/cover.jpg"}, {}, root
+                    MagicMock(), episode, {
+                        "cover": "Podcast/Assets/cover.jpg",
+                        "base_url": "https://example.test",
+                    }, {}, root
                 )
             self.assertEqual(video_id, "existing-video")
             upload.assert_not_called()
+            update_details.assert_called_once()
             set_thumbnail.assert_called_once()
             saved = json.loads(metadata_path.read_text(encoding="utf-8"))
+            self.assertEqual(saved["youtube_description_version"], YOUTUBE_DESCRIPTION_VERSION)
+            self.assertEqual(
+                saved["youtube_description_insight_url"],
+                "https://insynergy.io/insights/judgment-not-meaning",
+            )
             self.assertEqual(saved["youtube_thumbnail_version"], OG_THUMBNAIL_VERSION)
             self.assertEqual(
                 saved["youtube_thumbnail_source_url"], "https://images.example.test/og.png"
