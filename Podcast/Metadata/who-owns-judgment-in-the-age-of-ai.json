@@ -25,5 +25,8 @@
   "youtube_japanese_caption_id": "AUieDaY7y8A0lC9F7X4pYWpE4O3c0Tu3wQ7C2we1pJmeOrQzqQOd1qkhbS0",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "youtube_thumbnail_version": "insynergy-insight-og-v1",
+  "youtube_thumbnail_insight_url": "https://insynergy.io/insights/who-owns-judgment-in-the-age-of-ai",
+  "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/afb674291c3e45f18b586ad7cd3f455a/who-owns-judgment-in-the-age-of-ai.png"
 }

@@ -25,5 +25,8 @@
   "youtube_japanese_caption_id": "AUieDaZF2aj70XMU5A1NypPjyiADMIsvLIbiKmtlr0Sxyjq4w-CVD2smAnc",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "youtube_thumbnail_version": "insynergy-insight-og-v1",
+  "youtube_thumbnail_insight_url": "https://insynergy.io/insights/why-finance-wont-let-ai-decide",
+  "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/bced65ead1414adabf0dcf98c03a3251/why-finance-wont-let-ai-decide.png"
 }
