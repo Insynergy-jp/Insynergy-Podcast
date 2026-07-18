@@ -205,9 +205,12 @@ def should_retry_overlong(errors: Sequence[str]) -> bool:
     return any(error.startswith("Script is too long") for error in errors)
 
 
-def generate_script(client: Any, model: str, prompt: str) -> str:
+def generate_script(client: Any, model: str, prompt: str, *, max_output_tokens: int | None = None) -> str:
+    request: dict[str, Any] = {"model": model, "input": prompt}
+    if max_output_tokens is not None:
+        request["max_output_tokens"] = max_output_tokens
     try:
-        response = client.responses.create(model=model, input=prompt)
+        response = client.responses.create(**request)
     except Exception as exc:
         raise PodcastError(f"OpenAI Responses API failed: {exc}") from exc
     text = getattr(response, "output_text", None)
@@ -444,6 +447,7 @@ def run(args: argparse.Namespace) -> None:
             client,
             config.text_model,
             build_condense_prompt(script, source_metadata, args.duration, args.style),
+            max_output_tokens=max(1024, args.duration * 210),
         )
         atomic_write_text(
             paths.script,
