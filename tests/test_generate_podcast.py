@@ -57,6 +57,20 @@ class PodcastTests(unittest.TestCase):
         with self.assertRaisesRegex(gp.PodcastError, "empty script"):
             gp.generate_script(client, "model", "prompt")
 
+    def test_generate_script_can_cap_revision_output(self):
+        requests = []
+
+        def create(**kwargs):
+            requests.append(kwargs)
+            return SimpleNamespace(output_text="Revised narration")
+
+        client = SimpleNamespace(responses=SimpleNamespace(create=create))
+        self.assertEqual(
+            gp.generate_script(client, "model", "prompt", max_output_tokens=2100),
+            "Revised narration",
+        )
+        self.assertEqual(requests, [{"model": "model", "input": "prompt", "max_output_tokens": 2100}])
+
     def test_condense_prompt_sets_a_hard_word_limit(self):
         prompt = gp.build_condense_prompt("Original narration", {"title": "Title"}, 10, "academic")
         self.assertIn("Target length: 1400 words", prompt)
