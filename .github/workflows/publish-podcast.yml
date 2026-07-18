@@ -63,10 +63,12 @@ jobs:
         run: python -m unittest discover -s tests -v
 
       - name: Build changed episodes
+        id: build_changed
         if: ${{ !inputs.force_regeneration }}
         run: python Tools/run_pipeline.py --strict-email
 
       - name: Force-build all episodes
+        id: force_build
         if: ${{ inputs.force_regeneration }}
         run: python Tools/run_pipeline.py --strict-email --force
 
@@ -74,6 +76,7 @@ jobs:
         run: python Tools/youtube_publish.py
 
       - name: Commit durable episode outputs
+        if: ${{ always() && (steps.build_changed.outcome == 'success' || steps.force_build.outcome == 'success') }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

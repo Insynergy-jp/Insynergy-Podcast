@@ -48,7 +48,7 @@ class YouTubePublishingTests(unittest.TestCase):
             id="DD-003", number=3, title="Judgment, Not Meaning", slug="judgment-not-meaning",
             description="A description.", published=datetime.now(timezone.utc), status="published",
             podcast=True, duration_minutes=10, voice_style="academic", source=Path("source.md"),
-            episode_type="full", manifest=Path("episode.yml"),
+            episode_type="full", youtube_video_id=None, manifest=Path("episode.yml"),
         )
 
     def test_credentials_are_optional_or_complete(self):
@@ -249,6 +249,42 @@ class YouTubePublishingTests(unittest.TestCase):
             self.assertEqual(
                 saved["youtube_thumbnail_source_url"], "https://images.example.test/og.png"
             )
+
+    def test_manifest_video_id_is_persisted_before_later_api_failure(self):
+        from dataclasses import replace
+
+        episode = replace(self.episode(), youtube_video_id="recovered-video")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            scripts = root / "Podcast" / "Scripts"
+            audio = root / "Podcast" / "Audio"
+            metadata = root / "Podcast" / "Metadata"
+            scripts.mkdir(parents=True)
+            audio.mkdir(parents=True)
+            metadata.mkdir(parents=True)
+            (scripts / f"{episode.slug}-podcast.md").write_text("script", encoding="utf-8")
+            (audio / f"{episode.slug}.mp3").write_bytes(b"audio")
+            metadata_path = metadata / f"{episode.slug}.json"
+            metadata_path.write_text(json.dumps({
+                "youtube_thumbnail_version": OG_THUMBNAIL_VERSION,
+                "youtube_thumbnail_insight_url": "https://insynergy.io/insights/judgment-not-meaning",
+                "youtube_thumbnail_source_url": "https://images.example.test/og.png",
+            }), encoding="utf-8")
+            with (
+                patch("youtube_publish.upload_video") as upload,
+                patch("youtube_publish.update_video_details", side_effect=RuntimeError("quota exceeded")),
+            ):
+                with self.assertRaisesRegex(RuntimeError, "quota exceeded"):
+                    publish_episode(
+                        MagicMock(), episode, {
+                            "cover": "Podcast/Assets/cover.jpg",
+                            "base_url": "https://example.test",
+                        }, {}, root
+                    )
+            upload.assert_not_called()
+            saved = json.loads(metadata_path.read_text(encoding="utf-8"))
+            self.assertEqual(saved["youtube_video_id"], "recovered-video")
+            self.assertEqual(saved["youtube_url"], "https://youtu.be/recovered-video")
 
     def test_resumable_upload_returns_video_id(self):
         youtube = MagicMock()

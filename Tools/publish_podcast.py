@@ -48,6 +48,7 @@ class Episode:
     voice_style: str
     source: Path
     episode_type: str
+    youtube_video_id: str | None
     manifest: Path
 
 
@@ -93,7 +94,9 @@ def parse_episode(path: Path, root: Path = ROOT) -> Episode:
         slug=str(data["slug"]), description=str(data.get("description", "")),
         published=published, status=str(data["status"]), podcast=bool(data.get("podcast", False)),
         duration_minutes=int(data.get("duration_minutes", 8)), voice_style=str(data.get("voice_style", "executive")),
-        source=source, episode_type=str(data.get("episode_type", "full")), manifest=path,
+        source=source, episode_type=str(data.get("episode_type", "full")),
+        youtube_video_id=(str(data["youtube_video_id"]) if data.get("youtube_video_id") else None),
+        manifest=path,
     )
 
 
