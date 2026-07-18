@@ -28,5 +28,7 @@
   "youtube_japanese_caption_id": "AUieDaYRDwNYg-mJpw_6i83in6Qo_3f7BcsScqO6cdZciTErwy3h6-a2e14",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "youtube_description_version": "insynergy-insight-description-v1",
+  "youtube_description_insight_url": "https://insynergy.io/insights/high-agency-and-the-design-of-judgment"
 }

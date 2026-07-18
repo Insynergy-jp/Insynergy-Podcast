@@ -28,5 +28,7 @@
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_thumbnail_version": "insynergy-insight-og-v1",
   "youtube_thumbnail_insight_url": "https://insynergy.io/insights/human-in-the-lead-end-of-a-comfortable-illusion",
-  "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/c69c3b21bb814cb5a931cf4b29806f18/human_in_the_lead_english_essay.png"
+  "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/c69c3b21bb814cb5a931cf4b29806f18/human_in_the_lead_english_essay.png",
+  "youtube_description_version": "insynergy-insight-description-v1",
+  "youtube_description_insight_url": "https://insynergy.io/insights/human-in-the-lead-end-of-a-comfortable-illusion"
 }

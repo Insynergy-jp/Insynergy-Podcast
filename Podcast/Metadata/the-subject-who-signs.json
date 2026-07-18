@@ -28,5 +28,7 @@
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_thumbnail_version": "insynergy-insight-og-v1",
   "youtube_thumbnail_insight_url": "https://insynergy.io/insights/the-subject-who-signs",
-  "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/ec3919d3e4b34c25a7cbe8d163732fd7/99E01D36-EEF8-4726-A352-63842CE2DC2A.png"
+  "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/ec3919d3e4b34c25a7cbe8d163732fd7/99E01D36-EEF8-4726-A352-63842CE2DC2A.png",
+  "youtube_description_version": "insynergy-insight-description-v1",
+  "youtube_description_insight_url": "https://insynergy.io/insights/the-subject-who-signs"
 }

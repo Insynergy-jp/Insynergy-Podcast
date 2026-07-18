@@ -28,5 +28,7 @@
   "youtube_japanese_caption_id": "AUieDabe4-b-7HRRHZvf72KMGgwr4eotbEI2AKUaXw6bgqQzqnXKMFup_I0",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "youtube_description_version": "insynergy-insight-description-v1",
+  "youtube_description_insight_url": "https://insynergy.io/insights/the-last-signature-ai-judgment-bottleneck"
 }

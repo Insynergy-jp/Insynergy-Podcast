@@ -28,5 +28,7 @@
   "youtube_japanese_caption_id": "AUieDabN_46I3_urGg88B8oqDNhcqQ_MufaJ2frFyyUukKQ648pg8HaTVSE",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "youtube_description_version": "insynergy-insight-description-v1",
+  "youtube_description_insight_url": "https://insynergy.io/insights/quiet-disappearance-of-judgment-voice-ai-decision-design"
 }
