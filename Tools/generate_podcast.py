@@ -181,6 +181,30 @@ Source content:
 """
 
 
+def build_condense_prompt(script: str, metadata: Mapping[str, Any], duration: int, style: str = "executive") -> str:
+    target_words = duration * 140
+    minimum_words = round(target_words * 0.9)
+    maximum_words = round(target_words * 1.1)
+    return f"""Condense the English podcast narration below to fit its intended duration.
+
+Source title: {metadata.get('title', '')}
+Voice style: {style}.
+Target length: {target_words} words for approximately {duration} minutes.
+Required range: {minimum_words} to {maximum_words} words. Do not exceed {maximum_words} words.
+Return only the revised ready-to-read narration, with no headings, bullets, notes, or commentary.
+Preserve the central argument, factual claims, numbers, proper nouns, attribution, nuance,
+and the closing connection between Insynergy and Decision Design. Do not add facts, URLs,
+statistics, quotations, or attributions. Condense repetition and secondary examples first.
+
+Narration to condense:
+{script}
+"""
+
+
+def should_retry_overlong(errors: Sequence[str]) -> bool:
+    return any(error.startswith("Script is too long") for error in errors)
+
+
 def generate_script(client: Any, model: str, prompt: str) -> str:
     try:
         response = client.responses.create(model=model, input=prompt)
@@ -415,6 +439,25 @@ def run(args: argparse.Namespace) -> None:
         atomic_write_text(paths.script, script_document(script, title=title, source=source_relative, duration=args.duration, generated_at=generated_at, config=config, voice=voice))
 
     errors = validate_script(script, raw, args.duration)
+    if not args.audio_only and should_retry_overlong(errors):
+        script = generate_script(
+            client,
+            config.text_model,
+            build_condense_prompt(script, source_metadata, args.duration, args.style),
+        )
+        atomic_write_text(
+            paths.script,
+            script_document(
+                script,
+                title=title,
+                source=source_relative,
+                duration=args.duration,
+                generated_at=generated_at,
+                config=config,
+                voice=voice,
+            ),
+        )
+        errors = validate_script(script, raw, args.duration)
     if errors:
         raise PodcastError("Script validation failed; audio was not generated. " + " ".join(errors))
 
