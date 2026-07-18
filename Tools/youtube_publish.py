@@ -36,6 +36,7 @@ CAPTION_TRANSCRIPTION_MODEL = "whisper-1"
 DEFAULT_CAPTION_TRANSLATION_MODEL = "gpt-5.4-mini"
 CAPTION_TRANSLATION_BATCH_SIZE = 20
 OG_THUMBNAIL_VERSION = "insynergy-insight-og-v1"
+YOUTUBE_DESCRIPTION_VERSION = "insynergy-insight-description-v1"
 DEFAULT_INSIGHTS_BASE_URL = "https://insynergy.io/insights"
 MAX_HTML_BYTES = 2 * 1024 * 1024
 MAX_SOURCE_IMAGE_BYTES = 16 * 1024 * 1024
@@ -212,8 +213,10 @@ def render_video(audio: Path, cover: Path, destination: Path) -> None:
 
 def video_body(episode: Episode, show: Mapping[str, Any], config: Mapping[str, Any]) -> dict[str, Any]:
     base_url = str(show["base_url"]).rstrip("/")
+    article_url = insight_url(episode, config)
     description = (
-        f"{episode.description}\n\n"
+        f"Episode overview:\n{episode.description}\n\n"
+        f"Read the full Insynergy Insight:\n{article_url}\n\n"
         f"Listen and subscribe: {base_url}/\n"
         f"Podcast RSS: {base_url}/podcast.xml\n\n"
         "Decision Design is a judgment architecture framework proposed by Ryoji Morii, "
@@ -234,6 +237,23 @@ def video_body(episode: Episode, show: Mapping[str, Any], config: Mapping[str, A
             "selfDeclaredMadeForKids": False,
         },
     }
+
+
+def description_is_fresh(metadata: Mapping[str, Any], article_url: str) -> bool:
+    return bool(
+        metadata.get("youtube_description_version") == YOUTUBE_DESCRIPTION_VERSION
+        and metadata.get("youtube_description_insight_url") == article_url
+    )
+
+
+def update_video_details(youtube: Any, video_id: str, body: Mapping[str, Any]) -> None:
+    snippet = body.get("snippet")
+    if not isinstance(snippet, Mapping):
+        raise YouTubePublishError("YouTube video body is missing its snippet")
+    youtube.videos().update(
+        part="snippet",
+        body={"id": video_id, "snippet": dict(snippet)},
+    ).execute()
 
 
 def upload_video(youtube: Any, video: Path, body: Mapping[str, Any]) -> str:
@@ -445,6 +465,8 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
         raise YouTubePublishError(f"Generated podcast assets are missing for {episode.id}")
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     video_id = metadata.get("youtube_video_id")
+    article_url = insight_url(episode, config)
+    details = video_body(episode, show, config)
     thumbnail: Path | None = None
     thumbnail_page_url: str | None = None
     thumbnail_source_url: str | None = None
@@ -462,11 +484,23 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
     if not video_id:
         video = root / "Podcast" / "YouTube" / f"{episode.slug}.mp4"
         render_video(audio, thumbnail or root / str(show["cover"]), video)
-        video_id = upload_video(youtube, video, video_body(episode, show, config))
-        metadata.update({"youtube_video_id": video_id, "youtube_url": f"https://youtu.be/{video_id}"})
+        video_id = upload_video(youtube, video, details)
+        metadata.update({
+            "youtube_video_id": video_id,
+            "youtube_url": f"https://youtu.be/{video_id}",
+            "youtube_description_version": YOUTUBE_DESCRIPTION_VERSION,
+            "youtube_description_insight_url": article_url,
+        })
         print(f"YouTube uploaded: {episode.id} https://youtu.be/{video_id}")
     else:
         print(f"YouTube video fresh: {episode.id} ({video_id})")
+        if not description_is_fresh(metadata, article_url):
+            update_video_details(youtube, str(video_id), details)
+            metadata.update({
+                "youtube_description_version": YOUTUBE_DESCRIPTION_VERSION,
+                "youtube_description_insight_url": article_url,
+            })
+            print(f"YouTube description updated: {episode.id} ({article_url})")
     if thumbnail and thumbnail_page_url and thumbnail_source_url:
         try:
             set_video_thumbnail(youtube, str(video_id), thumbnail)
