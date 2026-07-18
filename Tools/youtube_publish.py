@@ -11,8 +11,12 @@ import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Mapping
+from urllib.error import HTTPError, URLError
+from urllib.parse import urljoin, urlparse
+from urllib.request import Request, urlopen
 
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
@@ -31,10 +35,30 @@ ENGLISH_CAPTION_TEXT_VERSION = "insynergy-normalization-v1"
 CAPTION_TRANSCRIPTION_MODEL = "whisper-1"
 DEFAULT_CAPTION_TRANSLATION_MODEL = "gpt-5.4-mini"
 CAPTION_TRANSLATION_BATCH_SIZE = 20
+OG_THUMBNAIL_VERSION = "insynergy-insight-og-v1"
+DEFAULT_INSIGHTS_BASE_URL = "https://insynergy.io/insights"
+MAX_HTML_BYTES = 2 * 1024 * 1024
+MAX_SOURCE_IMAGE_BYTES = 16 * 1024 * 1024
+MAX_YOUTUBE_THUMBNAIL_BYTES = 2_000_000
 
 
 class YouTubePublishError(RuntimeError):
     pass
+
+
+class OpenGraphParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.image_url: str | None = None
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.lower() != "meta" or self.image_url:
+            return
+        values = {str(name).lower(): value for name, value in attrs if value is not None}
+        if str(values.get("property", "")).lower() == "og:image":
+            content = str(values.get("content", "")).strip()
+            if content:
+                self.image_url = content
 
 
 @dataclass(frozen=True)
@@ -70,6 +94,99 @@ class YouTubeCredentials:
         )
 
 
+def _read_response(response: Any, limit: int, label: str) -> bytes:
+    data = response.read(limit + 1)
+    if len(data) > limit:
+        raise YouTubePublishError(f"{label} exceeds the {limit}-byte download limit")
+    return data
+
+
+def _https_url(value: str, label: str) -> str:
+    parsed = urlparse(value)
+    if parsed.scheme != "https" or not parsed.netloc:
+        raise YouTubePublishError(f"{label} must be an absolute HTTPS URL: {value}")
+    return value
+
+
+def insight_url(episode: Episode, config: Mapping[str, Any]) -> str:
+    overrides = config.get("insight_urls", {})
+    if isinstance(overrides, Mapping):
+        override = overrides.get(episode.slug) or overrides.get(episode.id)
+        if override:
+            return _https_url(str(override), "Insight URL")
+    base = str(config.get("insights_base_url", DEFAULT_INSIGHTS_BASE_URL)).rstrip("/")
+    return _https_url(f"{base}/{episode.slug}", "Insight URL")
+
+
+def fetch_insight_og_image(
+    episode: Episode, config: Mapping[str, Any], destination: Path
+) -> tuple[str, str]:
+    page_url = insight_url(episode, config)
+    headers = {"User-Agent": "Insynergy-Podcast/1.0 (+https://insynergy.io/)"}
+    try:
+        with urlopen(Request(page_url, headers=headers), timeout=20) as response:
+            html_bytes = _read_response(response, MAX_HTML_BYTES, "Insight HTML")
+        parser = OpenGraphParser()
+        parser.feed(html_bytes.decode("utf-8", errors="replace"))
+        if not parser.image_url:
+            raise YouTubePublishError(f"Insight page has no og:image: {page_url}")
+        image_url = _https_url(urljoin(page_url, parser.image_url), "Open Graph image URL")
+        with urlopen(Request(image_url, headers=headers), timeout=30) as response:
+            content_type = str(response.headers.get("Content-Type", "")).split(";", 1)[0].lower()
+            if not content_type.startswith("image/"):
+                raise YouTubePublishError(
+                    f"Open Graph image returned an unsupported content type: {content_type or 'unknown'}"
+                )
+            image_bytes = _read_response(response, MAX_SOURCE_IMAGE_BYTES, "Open Graph image")
+    except (HTTPError, URLError, TimeoutError, OSError) as exc:
+        raise YouTubePublishError(f"Could not fetch Insight Open Graph image for {episode.id}: {exc}") from exc
+    if not image_bytes:
+        raise YouTubePublishError(f"Open Graph image was empty: {image_url}")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_bytes(image_bytes)
+    return page_url, image_url
+
+
+def prepare_thumbnail(source: Path, destination: Path) -> None:
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        raise YouTubePublishError("ffmpeg is required to prepare YouTube thumbnails")
+    if not source.is_file() or source.stat().st_size == 0:
+        raise YouTubePublishError(f"Open Graph source image is missing or empty: {source}")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    for quality in (2, 4, 6, 8, 12):
+        command = [
+            ffmpeg, "-y", "-hide_banner", "-loglevel", "error", "-i", str(source),
+            "-vf",
+            "scale=1280:720:force_original_aspect_ratio=decrease,"
+            "pad=1280:720:(ow-iw)/2:(oh-ih)/2:color=0x0b0b0d,format=yuv420p",
+            "-frames:v", "1", "-q:v", str(quality), "-update", "1", str(destination),
+        ]
+        result = subprocess.run(command, capture_output=True, text=True, check=False)
+        if result.returncode != 0 or not destination.is_file() or destination.stat().st_size == 0:
+            raise YouTubePublishError("YouTube thumbnail conversion failed: " + result.stderr.strip())
+        if destination.stat().st_size <= MAX_YOUTUBE_THUMBNAIL_BYTES:
+            return
+    raise YouTubePublishError(
+        f"YouTube thumbnail remains larger than {MAX_YOUTUBE_THUMBNAIL_BYTES} bytes after conversion"
+    )
+
+
+def set_video_thumbnail(youtube: Any, video_id: str, thumbnail: Path) -> None:
+    youtube.thumbnails().set(
+        videoId=video_id,
+        media_body=MediaFileUpload(str(thumbnail), mimetype="image/jpeg", resumable=False),
+    ).execute()
+
+
+def thumbnail_is_fresh(metadata: Mapping[str, Any]) -> bool:
+    return bool(
+        metadata.get("youtube_thumbnail_version") == OG_THUMBNAIL_VERSION
+        and metadata.get("youtube_thumbnail_source_url")
+        and metadata.get("youtube_thumbnail_insight_url")
+    )
+
+
 def render_video(audio: Path, cover: Path, destination: Path) -> None:
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg:
@@ -82,7 +199,7 @@ def render_video(audio: Path, cover: Path, destination: Path) -> None:
         ffmpeg, "-y", "-hide_banner", "-loglevel", "error",
         "-loop", "1", "-framerate", "1", "-i", str(cover), "-i", str(audio),
         "-filter_complex",
-        "[0:v]scale=1080:1080:force_original_aspect_ratio=decrease,"
+        "[0:v]scale=1920:1080:force_original_aspect_ratio=decrease,"
         "pad=1920:1080:(ow-iw)/2:(oh-ih)/2:color=0x0b0b0d,format=yuv420p[v]",
         "-map", "[v]", "-map", "1:a:0", "-fps_mode", "vfr", "-c:v", "libx264", "-preset", "veryfast",
         "-tune", "stillimage", "-crf", "20", "-c:a", "aac", "-b:a", "192k",
@@ -328,16 +445,43 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
         raise YouTubePublishError(f"Generated podcast assets are missing for {episode.id}")
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     video_id = metadata.get("youtube_video_id")
+    thumbnail: Path | None = None
+    thumbnail_page_url: str | None = None
+    thumbnail_source_url: str | None = None
+    if not video_id or not thumbnail_is_fresh(metadata):
+        source_image = root / "Podcast" / "YouTube" / f"{episode.slug}.og-image"
+        candidate = root / "Podcast" / "YouTube" / f"{episode.slug}.thumbnail.jpg"
+        try:
+            thumbnail_page_url, thumbnail_source_url = fetch_insight_og_image(
+                episode, config, source_image
+            )
+            prepare_thumbnail(source_image, candidate)
+            thumbnail = candidate
+        except YouTubePublishError as exc:
+            print(f"Warning: {exc}; using the podcast cover for {episode.id}", file=sys.stderr)
     if not video_id:
         video = root / "Podcast" / "YouTube" / f"{episode.slug}.mp4"
-        render_video(audio, root / str(show["cover"]), video)
+        render_video(audio, thumbnail or root / str(show["cover"]), video)
         video_id = upload_video(youtube, video, video_body(episode, show, config))
         metadata.update({"youtube_video_id": video_id, "youtube_url": f"https://youtu.be/{video_id}"})
         print(f"YouTube uploaded: {episode.id} https://youtu.be/{video_id}")
     else:
         print(f"YouTube video fresh: {episode.id} ({video_id})")
+    if thumbnail and thumbnail_page_url and thumbnail_source_url:
+        try:
+            set_video_thumbnail(youtube, str(video_id), thumbnail)
+        except Exception as exc:
+            print(f"Warning: YouTube thumbnail update failed for {episode.id}: {exc}", file=sys.stderr)
+        else:
+            metadata.update({
+                "youtube_thumbnail_version": OG_THUMBNAIL_VERSION,
+                "youtube_thumbnail_insight_url": thumbnail_page_url,
+                "youtube_thumbnail_source_url": thumbnail_source_url,
+            })
+            print(f"YouTube Insight thumbnail updated: {episode.id} ({thumbnail_source_url})")
     if captions_are_fresh(metadata):
         print(f"YouTube synchronized captions fresh: {episode.id}")
+        metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         return str(video_id)
     had_recorded_japanese_caption = bool(metadata.get("youtube_japanese_caption_id"))
     remote_captions = existing_caption_ids(youtube, str(video_id))

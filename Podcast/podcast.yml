@@ -19,6 +19,12 @@ youtube:
   enabled: true
   delivery: direct_api
   rss_ingestion: false
+  insights_base_url: https://insynergy.io/insights
+  insight_urls:
+    the-real-risk-of-ai-is-not-the-loss-of-meaning-its-the-loss-of-judgment: >-
+      https://insynergy.io/insights/decision-design-loss-of-judgment
+    why-finance-wont-let-ai-decide-the-structural-logic-of-responsibility-retention: >-
+      https://insynergy.io/insights/why-finance-wont-let-ai-decide
   privacy_status: public
   category_id: "22"
   tags:

@@ -26,6 +26,8 @@ When the user gives an episode ID and an absolute Markdown article path and expl
    - GitHub Pages episode entry
    - `youtube_video_id` and `youtube_url`
    - `youtube_caption_id` and `youtube_caption_language: en`
+   - `youtube_thumbnail_source_url`, `youtube_thumbnail_insight_url`, and
+     `youtube_thumbnail_version: insynergy-insight-og-v1`
 10. Report the public podcast site, RSS feed, YouTube URL, workflow run, and validation results.
 
 ## Fixed distribution policy
@@ -37,6 +39,8 @@ When the user gives an episode ID and an absolute Markdown article path and expl
 - YouTube RSS ingestion: disabled; never connect or submit the podcast RSS feed to YouTube
 - YouTube visibility: public from initial upload
 - YouTube captions: automatically upload the English SRT generated from the final narration
+- YouTube thumbnails: use the source Insight page's `og:image`, converted to a
+  YouTube-safe 1280×720 JPEG; fall back to the podcast cover only when no Insight OG image is available
 
 ## Safety and consistency
 
