@@ -27,5 +27,8 @@
   "youtube_japanese_caption_id": "AUieDabMtN4WbY_wpRZpkDMaqnjkmoRaD364k5n-AIBGRlqTv09BBxom2K8",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "youtube_thumbnail_version": "insynergy-insight-og-v1",
+  "youtube_thumbnail_insight_url": "https://insynergy.io/insights/the-structural-limit-of-human-in-the-loop",
+  "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/78f4f43ea8e441e2abf9c33ae88dcf7f/The%20Structural%20Limit%20of%20Human-in-the-Loop.png"
 }

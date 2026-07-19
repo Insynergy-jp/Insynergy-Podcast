@@ -27,5 +27,8 @@
   "youtube_japanese_caption_id": "AUieDaZGFu9dLzTjGqbSBkjgkwXrp7dMbHRRRVeMe0J6TzE8c_7oNiwWEpY",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "youtube_thumbnail_version": "insynergy-insight-og-v1",
+  "youtube_thumbnail_insight_url": "https://insynergy.io/insights/architecture-of-remaining-judgment",
+  "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/e44ee1ffe7af49838e3ae60e7bf09a0b/architecture-of-remaining-judgment.png"
 }
