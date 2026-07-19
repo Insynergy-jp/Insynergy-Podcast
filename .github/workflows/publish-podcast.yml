@@ -62,6 +62,9 @@ jobs:
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
 
+      - name: Validate source references (pre-publication gate)
+        run: python Tools/validate_sources.py
+
       - name: Build changed episodes
         id: build_changed
         if: ${{ !inputs.force_regeneration }}

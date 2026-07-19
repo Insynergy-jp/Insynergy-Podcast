@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 from publish_podcast import ROOT, PublishError, build_public, generated_paths, load_episodes, load_show
+from source_reference import SourceReferenceError, episode_source_reference
 
 
 def sha256(path: Path) -> str:
@@ -41,6 +42,10 @@ def run(force: bool = False, strict_email: bool = False) -> None:
     for episode in load_episodes():
         if not episode.podcast or episode.status != "published":
             continue
+        try:
+            source_reference = episode_source_reference(episode, show.get("youtube", {}))
+        except SourceReferenceError as exc:
+            raise PublishError(str(exc)) from exc
         profile = profiles.get(episode.voice_style)
         if not isinstance(profile, dict) or not profile.get("voice"):
             raise PublishError(f"Unknown voice_style '{episode.voice_style}' in {episode.manifest}")
@@ -61,7 +66,7 @@ def run(force: bool = False, strict_email: bool = False) -> None:
         if result.returncode != 0:
             raise PublishError(f"Generation failed for {episode.id}")
         data = json.loads(metadata.read_text(encoding="utf-8"))
-        data.update({"episode_id": episode.id, "episode": episode.number, "voice_style": episode.voice_style, "source_sha256": source_hash})
+        data.update({"episode_id": episode.id, "episode": episode.number, "voice_style": episode.voice_style, "source_sha256": source_hash, "sourceReference": source_reference})
         metadata.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         generated += 1
     feed = build_public(strict_email=strict_email)

@@ -112,6 +112,12 @@ class YouTubePublishingTests(unittest.TestCase):
             "https://insynergy.io/insights/custom-slug",
         )
 
+    def test_insight_url_rejects_noncanonical_override(self):
+        with self.assertRaisesRegex(Exception, "Fail closed"):
+            insight_url(self.episode(), {"insight_urls": {
+                "judgment-not-meaning": "https://www.insynergy.io/insights/custom-slug?utm=x",
+            }})
+
     def test_fetches_og_image_from_insight_page(self):
         class Response:
             def __init__(self, data, content_type):

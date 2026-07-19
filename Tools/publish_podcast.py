@@ -21,6 +21,7 @@ from xml.etree import ElementTree as ET
 import yaml
 from mutagen.id3 import APIC, COMM, TALB, TIT2, TPE1, TPOS, TRCK, TXXX, ID3
 from mutagen.mp3 import MP3
+from source_reference import episode_insight_url, validate_body_reference
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -219,6 +220,7 @@ def build_public(root: Path = ROOT, strict_email: bool = False) -> Path:
 
 def create_feed(show: dict[str, Any], episodes: list[tuple[Episode, Path, int]]) -> ET.Element:
     base = str(show["base_url"]).rstrip("/")
+    source_config = show.get("youtube", {})
     rss = ET.Element("rss", {"version": "2.0"})
     channel = ET.SubElement(rss, "channel")
     for tag, value in (("title", show["title"]), ("link", base + "/"), ("description", show["description"]), ("language", show["language"]), ("copyright", show.get("copyright", ""))):
@@ -234,9 +236,15 @@ def create_feed(show: dict[str, Any], episodes: list[tuple[Episode, Path, int]])
     ET.SubElement(owner, f"{{{ITUNES}}}name").text = str(show["author"])
     ET.SubElement(owner, f"{{{ITUNES}}}email").text = str(show["contact_email"])
     for episode, audio, seconds in episodes:
+        canonical_url = episode_insight_url(episode, source_config)
+        source_description = (
+            f"{episode.description}\n\nRead the full Insynergy Insight:\n{canonical_url}"
+        )
+        validate_body_reference(source_description, canonical_url)
         item = ET.SubElement(channel, "item")
         ET.SubElement(item, "title").text = episode.title
-        ET.SubElement(item, "description").text = episode.description
+        ET.SubElement(item, "link").text = canonical_url
+        ET.SubElement(item, "description").text = source_description
         ET.SubElement(item, "guid", {"isPermaLink": "false"}).text = f"urn:insynergy:podcast:{episode.id}"
         ET.SubElement(item, "pubDate").text = format_datetime(episode.published)
         url = f"{base}/audio/{audio.name}"
