@@ -1,0 +1,15 @@
+id: DD-025
+episode: 25
+title: 'The Architecture of Judgment: What a Japanese Deployment Reveals About the Missing Layer in Enterprise AI Agents'
+slug: architecture-of-judgment-ai-agent-decision-design
+description: >-
+  What JTB's enterprise AI-agent deployment reveals about decomposing judgment,
+  allocating authority across AI, rules, and humans, and designing the
+  irreversible action gate.
+published: 2026-07-21T12:58:50+09:00
+status: published
+podcast: true
+duration_minutes: 10
+voice_style: academic
+source: Insights/architecture-of-judgment-ai-agent-decision-design.md
+episode_type: full
