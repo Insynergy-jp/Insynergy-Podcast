@@ -29,6 +29,7 @@ DECISION_DESIGN_DEFINITION = (
     "founder of Insynergy Inc., for structuring authority, accountability, and "
     "decision boundaries in AI-augmented organizations."
 )
+DECISION_DESIGN_DEFINITION_ERROR = "The required Decision Design definition was changed or incomplete."
 DEFAULT_VAULT = '/Users/ryojimorii/Documents/書類 - MacBook Air 13" M4 2025/Obsidian Vault'
 DEFAULT_INSIGHTS = "40_Outputs/Insight"
 DEFAULT_TEXT_MODEL = "gpt-5.4-mini"
@@ -172,7 +173,7 @@ Open by stating the central question. Near the end, concisely synthesize practic
 End by naturally connecting Insynergy with Decision Design.
 Do not say “In this article” or “Welcome back.” Do not invent facts, statistics, quotations,
 or attributions. Preserve the source's claims, nuance, proper nouns, numbers, and attribution.
-If Decision Design must be defined, reproduce this sentence exactly and do not paraphrase it:
+When the source mentions Decision Design, include this sentence exactly once and do not paraphrase it:
 “{DECISION_DESIGN_DEFINITION}”
 
 Source title: {metadata.get('title', '')}
@@ -201,8 +202,39 @@ Narration to condense:
 """
 
 
+def build_definition_revision_prompt(
+    script: str,
+    metadata: Mapping[str, Any],
+    duration: int,
+    style: str = "executive",
+) -> str:
+    target_words = duration * 140
+    minimum_words = round(target_words * 0.9)
+    maximum_words = round(target_words * 1.1)
+    return f"""Revise the English podcast narration below to repair its Decision Design definition.
+
+Source title: {metadata.get('title', '')}
+Voice style: {style}.
+Target length: {target_words} words for approximately {duration} minutes.
+Required range: {minimum_words} to {maximum_words} words.
+Return only the complete ready-to-read narration, with no headings, bullets, notes, or commentary.
+Include the following sentence exactly once and do not paraphrase it:
+“{DECISION_DESIGN_DEFINITION}”
+Change only what is necessary to repair the definition. Preserve the narration's central argument,
+factual claims, numbers, proper nouns, attribution, nuance, structure, and closing connection between
+Insynergy and Decision Design. Do not add facts, URLs, statistics, quotations, or attributions.
+
+Narration to revise:
+{script}
+"""
+
+
 def should_retry_overlong(errors: Sequence[str]) -> bool:
     return any(error.startswith("Script is too long") for error in errors)
+
+
+def should_retry_definition(errors: Sequence[str]) -> bool:
+    return DECISION_DESIGN_DEFINITION_ERROR in errors
 
 
 def generate_script(client: Any, model: str, prompt: str, *, max_output_tokens: int | None = None) -> str:
@@ -228,7 +260,7 @@ def validate_script(script: str, source: str, duration: int) -> list[str]:
     if added_urls:
         errors.append("The script added URL(s) absent from the source: " + ", ".join(sorted(added_urls)))
     if "Decision Design is a " in script and DECISION_DESIGN_DEFINITION not in script:
-        errors.append("The required Decision Design definition was changed or incomplete.")
+        errors.append(DECISION_DESIGN_DEFINITION_ERROR)
     markdown_marks = len(re.findall(r"(?m)^\s*(?:#{1,6}|[-*+]\s|\d+[.)]\s)|[*_`]{2,}", script))
     if markdown_marks > 3:
         errors.append("Too many Markdown/list markers remain in the narration.")
@@ -447,6 +479,26 @@ def run(args: argparse.Namespace) -> None:
             client,
             config.text_model,
             build_condense_prompt(script, source_metadata, args.duration, args.style),
+            max_output_tokens=max(1024, args.duration * 210),
+        )
+        atomic_write_text(
+            paths.script,
+            script_document(
+                script,
+                title=title,
+                source=source_relative,
+                duration=args.duration,
+                generated_at=generated_at,
+                config=config,
+                voice=voice,
+            ),
+        )
+        errors = validate_script(script, raw, args.duration)
+    if not args.audio_only and should_retry_definition(errors):
+        script = generate_script(
+            client,
+            config.text_model,
+            build_definition_revision_prompt(script, source_metadata, args.duration, args.style),
             max_output_tokens=max(1024, args.duration * 210),
         )
         atomic_write_text(
