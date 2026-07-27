@@ -1,0 +1,16 @@
+id: DD-036
+episode: 36
+title: "The Undesigned Decision: Why AI Agents Expose a Governance Void, Not a Security Flaw"
+slug: undesigned-decision-ai-agent-governance-void
+description: >-
+  AI agents are exposing a governance void that security controls alone cannot
+  fix. This episode examines how explicit decision boundaries, authority,
+  escalation, traceability, and accountability must be designed before
+  autonomous systems act across consequential enterprise workflows.
+published: 2026-07-27T19:02:20+09:00
+status: published
+podcast: true
+duration_minutes: 10
+voice_style: academic
+source: "Insights/The Undesigned Decision- Why AI Agents Expose a Governance Void, Not a Security Flaw.md"
+episode_type: full
