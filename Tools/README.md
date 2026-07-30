@@ -242,6 +242,18 @@ youtube:
 
 Insightの既存 `og:image` は毎回取得して内容SHA-256を比較します。Insight URL、画像URLまたは画像内容が変わった場合のみ1280×720・2MB以下のJPEGへ再変換し、既存動画のサムネイルだけを更新します。Insightページおよび元画像への書き戻しは行いません。
 
+### YouTube専用サムネイル
+
+Insightの `og:image` はそのまま公開せず、YouTube専用の編集テンプレートの素材として使用します。テンプレートは1280×720で、OG画像を右側のカード、左側を短い見出し、`DECISION DESIGN`、`INSYNERGY`、公式Wave Symbolのブランド領域として構成します。生成はPillowによる決定論的処理であり、Insightページや元のOG画像は変更しません。
+
+短い見出しはEpisode manifestの `youtube_thumbnail_text` で指定できます。80文字以内を必須とし、省略時は `youtube_title` またはPodcastタイトルから自動的に短縮します。
+
+```yaml
+youtube_thumbnail_text: HUMAN REVIEW DOESN'T SCALE
+```
+
+テンプレートのブランド設定は `Podcast/podcast.yml` の `youtube.thumbnail` で管理します。元画像、見出し、色、ブランド設定、テンプレートバージョンから生成ハッシュを作成し、内容が変わった場合だけ既存YouTube動画のサムネイルを更新します。
+
 字幕文字起こしモデルは `whisper-1`、日本語翻訳モデルは既定で `gpt-5.4-mini` です。翻訳モデルだけを変更する場合はRepository Variableまたは環境変数 `OPENAI_CAPTION_TRANSLATION_MODEL` を設定します。
 
 ### 初回OAuth設定

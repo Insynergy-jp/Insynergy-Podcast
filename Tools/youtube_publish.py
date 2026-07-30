@@ -24,6 +24,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from mutagen.mp3 import MP3
 from openai import OpenAI
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps, UnidentifiedImageError
 
 from publish_podcast import ROOT, Episode, generated_paths, load_episodes, load_show
 
@@ -37,6 +38,7 @@ CAPTION_TRANSCRIPTION_MODEL = "whisper-1"
 DEFAULT_CAPTION_TRANSLATION_MODEL = "gpt-5.4-mini"
 CAPTION_TRANSLATION_BATCH_SIZE = 20
 OG_THUMBNAIL_VERSION = "insynergy-insight-og-v1"
+YOUTUBE_THUMBNAIL_TEMPLATE_VERSION = "insynergy-youtube-editorial-v1"
 YOUTUBE_DETAILS_VERSION = "insynergy-youtube-details-v2"
 YOUTUBE_DESCRIPTION_VERSION = YOUTUBE_DETAILS_VERSION
 DEFAULT_INSIGHTS_BASE_URL = "https://insynergy.io/insights"
@@ -150,24 +152,152 @@ def fetch_insight_og_image(
     return page_url, image_url
 
 
-def prepare_thumbnail(source: Path, destination: Path) -> None:
-    ffmpeg = shutil.which("ffmpeg")
-    if not ffmpeg:
-        raise YouTubePublishError("ffmpeg is required to prepare YouTube thumbnails")
+def _font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    names = (
+        ("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", "/System/Library/Fonts/Supplemental/Arial Bold.ttf")
+        if bold else
+        ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "/System/Library/Fonts/Supplemental/Arial.ttf")
+    )
+    for name in names:
+        if Path(name).is_file():
+            return ImageFont.truetype(name, size=size)
+    return ImageFont.load_default()
+
+
+def thumbnail_text(episode: Episode) -> str:
+    text = (episode.youtube_thumbnail_text or episode.youtube_title or episode.title).strip()
+    if len(text) <= 58:
+        return text
+    for separator in (": ", ". ", " — ", "—", "? "):
+        first = text.split(separator, 1)[0].strip(" .:—?")
+        if 18 <= len(first) <= 58:
+            return first
+    return text[:55].rsplit(" ", 1)[0].rstrip(" .:—?") + "…"
+
+
+def _wrap_text(draw: ImageDraw.ImageDraw, text: str, font: Any, max_width: int) -> list[str]:
+    words = text.split()
+    lines: list[str] = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        width = draw.textbbox((0, 0), candidate, font=font)[2]
+        if current and width > max_width:
+            lines.append(current)
+            current = word
+        else:
+            current = candidate
+    if current:
+        lines.append(current)
+    return lines
+
+
+def wave_symbol_path(config: Mapping[str, Any], root: Path = ROOT) -> Path | None:
+    configured = str(config.get("wave_symbol", "")).strip()
+    if not configured:
+        return None
+    candidate = (root / configured).resolve()
+    try:
+        candidate.relative_to(root.resolve())
+    except ValueError as exc:
+        raise YouTubePublishError("youtube.thumbnail.wave_symbol must be inside the repository") from exc
+    if not candidate.is_file():
+        raise YouTubePublishError(f"YouTube thumbnail Wave Symbol not found: {candidate}")
+    return candidate
+
+
+def thumbnail_render_sha256(
+    source_sha256: str,
+    headline: str,
+    config: Mapping[str, Any],
+    wave_sha256: str = "",
+) -> str:
+    payload = {
+        "source_sha256": source_sha256,
+        "headline": headline,
+        "template_version": YOUTUBE_THUMBNAIL_TEMPLATE_VERSION,
+        "eyebrow": str(config.get("eyebrow", "DECISION DESIGN")),
+        "brand": str(config.get("brand", "INSYNERGY")),
+        "accent": str(config.get("accent", "#69AAFF")),
+        "wave_sha256": wave_sha256,
+    }
+    encoded = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def prepare_thumbnail(
+    source: Path,
+    destination: Path,
+    headline: str = "Decision Design",
+    config: Mapping[str, Any] | None = None,
+    root: Path = ROOT,
+) -> None:
+    config = config or {}
     if not source.is_file() or source.stat().st_size == 0:
         raise YouTubePublishError(f"Open Graph source image is missing or empty: {source}")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    for quality in (2, 4, 6, 8, 12):
-        command = [
-            ffmpeg, "-y", "-hide_banner", "-loglevel", "error", "-i", str(source),
-            "-vf",
-            "scale=1280:720:force_original_aspect_ratio=decrease,"
-            "pad=1280:720:(ow-iw)/2:(oh-ih)/2:color=0x0b0b0d,format=yuv420p",
-            "-frames:v", "1", "-q:v", str(quality), "-update", "1", str(destination),
-        ]
-        result = subprocess.run(command, capture_output=True, text=True, check=False)
-        if result.returncode != 0 or not destination.is_file() or destination.stat().st_size == 0:
-            raise YouTubePublishError("YouTube thumbnail conversion failed: " + result.stderr.strip())
+    try:
+        with Image.open(source) as opened:
+            original = ImageOps.exif_transpose(opened).convert("RGB")
+    except (OSError, UnidentifiedImageError) as exc:
+        raise YouTubePublishError(f"Open Graph source is not a valid image: {source}") from exc
+
+    background = ImageOps.fit(original, (1280, 720), method=Image.Resampling.LANCZOS)
+    background = background.filter(ImageFilter.GaussianBlur(radius=18))
+    background = ImageEnhance.Brightness(background).enhance(0.22).convert("RGBA")
+    canvas = Image.new("RGBA", (1280, 720), "#080B10")
+    canvas.alpha_composite(background)
+    overlay = Image.new("RGBA", canvas.size, (5, 9, 16, 120))
+    canvas.alpha_composite(overlay)
+    draw = ImageDraw.Draw(canvas)
+
+    accent = str(config.get("accent", "#69AAFF"))
+    draw.rounded_rectangle((746, 92, 1190, 628), radius=24, fill=(255, 255, 255, 28), outline=(255, 255, 255, 70), width=2)
+    card = ImageOps.fit(original, (412, 504), method=Image.Resampling.LANCZOS)
+    mask = Image.new("L", card.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, card.width, card.height), radius=18, fill=255)
+    canvas.paste(card, (762, 108), mask)
+
+    draw.rounded_rectangle((80, 88, 92, 142), radius=6, fill=accent)
+    eyebrow_font = _font(24, bold=True)
+    draw.text((112, 96), str(config.get("eyebrow", "DECISION DESIGN")), font=eyebrow_font, fill=accent, spacing=4)
+
+    headline = headline.strip() or "Decision Design"
+    font_size = 68
+    while font_size >= 46:
+        headline_font = _font(font_size, bold=True)
+        lines = _wrap_text(draw, headline, headline_font, 590)
+        if len(lines) <= 4:
+            break
+        font_size -= 4
+    line_height = font_size + 13
+    y = 190
+    for line in lines[:4]:
+        draw.text((80, y), line, font=headline_font, fill="#FFFFFF", stroke_width=1, stroke_fill="#0B111B")
+        y += line_height
+
+    draw.line((80, 580, 650, 580), fill=(255, 255, 255, 55), width=2)
+    brand_x = 80
+    wave = wave_symbol_path(config, root)
+    if wave:
+        try:
+            with Image.open(wave) as opened_wave:
+                symbol = ImageOps.contain(
+                    ImageOps.exif_transpose(opened_wave).convert("RGBA"),
+                    (118, 74),
+                    method=Image.Resampling.LANCZOS,
+                )
+        except (OSError, UnidentifiedImageError) as exc:
+            raise YouTubePublishError(f"Wave Symbol is not a valid image: {wave}") from exc
+        canvas.alpha_composite(symbol, (80, 604))
+        brand_x = 218
+    brand_font = _font(25, bold=True)
+    draw.text((brand_x, 606), str(config.get("brand", "INSYNERGY")), font=brand_font, fill="#FFFFFF")
+    draw.text((brand_x, 644), "JUDGMENT ARCHITECTURE FOR THE AGE OF AI", font=_font(15), fill=(190, 202, 219))
+
+    rgb = canvas.convert("RGB")
+    for quality in (92, 86, 80, 72, 64):
+        rgb.save(destination, "JPEG", quality=quality, optimize=True, progressive=True)
         if destination.stat().st_size <= MAX_YOUTUBE_THUMBNAIL_BYTES:
             return
     raise YouTubePublishError(
@@ -187,6 +317,7 @@ def thumbnail_is_fresh(
     insight_page_url: str | None = None,
     source_image_url: str | None = None,
     source_sha256: str | None = None,
+    render_sha256: str | None = None,
 ) -> bool:
     return bool(
         metadata.get("youtube_thumbnail_version") == OG_THUMBNAIL_VERSION
@@ -203,6 +334,11 @@ def thumbnail_is_fresh(
         and (
             source_sha256 is None
             or metadata.get("youtube_thumbnail_source_sha256") == source_sha256
+        )
+        and metadata.get("youtube_thumbnail_template_version") == YOUTUBE_THUMBNAIL_TEMPLATE_VERSION
+        and (
+            render_sha256 is None
+            or metadata.get("youtube_thumbnail_render_sha256") == render_sha256
         )
     )
 
@@ -551,6 +687,12 @@ def publish_episode(
     thumbnail: Path | None = None
     thumbnail_page_url: str | None = None
     thumbnail_source_url: str | None = None
+    thumbnail_config = config.get("thumbnail", {})
+    if not isinstance(thumbnail_config, Mapping):
+        raise YouTubePublishError("youtube.thumbnail must be a mapping")
+    headline = thumbnail_text(episode)
+    wave = wave_symbol_path(thumbnail_config, root)
+    wave_sha256 = hashlib.sha256(wave.read_bytes()).hexdigest() if wave else ""
     source_image = root / "Podcast" / "YouTube" / f"{episode.slug}.og-image"
     candidate = root / "Podcast" / "YouTube" / f"{episode.slug}.thumbnail.jpg"
     try:
@@ -558,10 +700,17 @@ def publish_episode(
             episode, config, source_image
         )
         thumbnail_source_sha256 = hashlib.sha256(source_image.read_bytes()).hexdigest()
+        thumbnail_render_hash = thumbnail_render_sha256(
+            thumbnail_source_sha256, headline, thumbnail_config, wave_sha256
+        )
         if not video_id or not thumbnail_is_fresh(
-            metadata, thumbnail_page_url, thumbnail_source_url, thumbnail_source_sha256
+            metadata,
+            thumbnail_page_url,
+            thumbnail_source_url,
+            thumbnail_source_sha256,
+            thumbnail_render_hash,
         ):
-            prepare_thumbnail(source_image, candidate)
+            prepare_thumbnail(source_image, candidate, headline, thumbnail_config, root)
             thumbnail = candidate
     except YouTubePublishError as exc:
         print(f"Warning: {exc}; using the podcast cover for {episode.id}", file=sys.stderr)
@@ -604,11 +753,15 @@ def publish_episode(
                 "youtube_thumbnail_insight_url": thumbnail_page_url,
                 "youtube_thumbnail_source_url": thumbnail_source_url,
                 "youtube_thumbnail_source_sha256": thumbnail_source_sha256,
+                "youtube_thumbnail_template_version": YOUTUBE_THUMBNAIL_TEMPLATE_VERSION,
+                "youtube_thumbnail_render_sha256": thumbnail_render_hash,
+                "youtube_thumbnail_text": headline,
+                "youtube_thumbnail_wave_symbol_sha256": wave_sha256,
             })
             metadata_path.write_text(
                 json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
             )
-            print(f"YouTube Insight thumbnail updated: {episode.id} ({thumbnail_source_url})")
+            print(f"YouTube editorial thumbnail updated: {episode.id} ({thumbnail_source_url})")
     if captions_are_fresh(metadata):
         print(f"YouTube synchronized captions fresh: {episode.id}")
         metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

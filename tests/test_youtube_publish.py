@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "Tools"))
 
@@ -14,6 +15,7 @@ from youtube_publish import (
     ENGLISH_CAPTION_TEXT_VERSION,
     CAPTION_TRANSLATION_BATCH_SIZE,
     OG_THUMBNAIL_VERSION,
+    YOUTUBE_THUMBNAIL_TEMPLATE_VERSION,
     YOUTUBE_DESCRIPTION_VERSION,
     YOUTUBE_CAPTION_SCOPE,
     YouTubeCredentials,
@@ -34,6 +36,9 @@ from youtube_publish import (
     retry_empty_translation,
     set_video_thumbnail,
     thumbnail_is_fresh,
+    thumbnail_render_sha256,
+    thumbnail_text,
+    wave_symbol_path,
     transcribe_segments,
     translate_segments_to_japanese,
     upload_caption,
@@ -165,28 +170,46 @@ class YouTubePublishingTests(unittest.TestCase):
             self.assertEqual(image_url, "https://images.example.test/og&v=1.png")
             self.assertEqual(destination.read_bytes(), b"image bytes")
 
-    @patch("youtube_publish.shutil.which", return_value="/usr/bin/ffmpeg")
-    @patch("youtube_publish.subprocess.run")
-    def test_thumbnail_is_converted_to_16_by_9_jpeg_under_limit(self, run, _which):
-        run.return_value.returncode = 0
-        run.return_value.stderr = ""
+    def test_thumbnail_is_rendered_as_editorial_16_by_9_jpeg_under_limit(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             source = root / "source.png"
             destination = root / "thumbnail.jpg"
-            source.write_bytes(b"image")
+            Image.new("RGB", (900, 500), "#C84A3A").save(source)
+            prepare_thumbnail(source, destination, "HUMAN REVIEW DOESN'T SCALE")
+            with Image.open(destination) as rendered:
+                self.assertEqual(rendered.size, (1280, 720))
+                self.assertEqual(rendered.format, "JPEG")
+                self.assertNotEqual(rendered.getpixel((100, 100)), rendered.getpixel((900, 300)))
+            self.assertLessEqual(destination.stat().st_size, 2_000_000)
 
-            def create_output(command, **_kwargs):
-                destination.write_bytes(b"jpeg")
-                return run.return_value
+    def test_thumbnail_text_is_explicit_or_safely_shortened(self):
+        from dataclasses import replace
+        explicit = replace(self.episode(), youtube_thumbnail_text="A SHORT PROMISE")
+        self.assertEqual(thumbnail_text(explicit), "A SHORT PROMISE")
+        long = replace(self.episode(), youtube_title="A very long YouTube title that should be shortened before it is rendered into the thumbnail layout")
+        self.assertLessEqual(len(thumbnail_text(long)), 58)
 
-            run.side_effect = create_output
-            prepare_thumbnail(source, destination)
-            command = run.call_args.args[0]
-            filter_value = command[command.index("-vf") + 1]
-            self.assertIn("scale=1280:720", filter_value)
-            self.assertIn("pad=1280:720", filter_value)
-            self.assertEqual(destination.read_bytes(), b"jpeg")
+    def test_thumbnail_render_hash_changes_with_text_and_brand_config(self):
+        first = thumbnail_render_sha256("source", "FIRST", {"accent": "#69AAFF"})
+        second = thumbnail_render_sha256("source", "SECOND", {"accent": "#69AAFF"})
+        third = thumbnail_render_sha256("source", "FIRST", {"accent": "#FF0000"})
+        self.assertNotEqual(first, second)
+        self.assertNotEqual(first, third)
+        self.assertNotEqual(first, thumbnail_render_sha256("source", "FIRST", {"accent": "#69AAFF"}, "wave"))
+
+    def test_wave_symbol_path_must_stay_inside_repository(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            asset = root / "Podcast" / "Assets" / "wave.png"
+            asset.parent.mkdir(parents=True)
+            Image.new("RGBA", (20, 10), "blue").save(asset)
+            self.assertEqual(
+                wave_symbol_path({"wave_symbol": "Podcast/Assets/wave.png"}, root),
+                asset.resolve(),
+            )
+            with self.assertRaises(YouTubePublishError):
+                wave_symbol_path({"wave_symbol": "../outside.png"}, root)
 
     def test_custom_thumbnail_is_uploaded_and_versioned(self):
         youtube = MagicMock()
@@ -199,18 +222,21 @@ class YouTubePublishingTests(unittest.TestCase):
             "youtube_thumbnail_version": OG_THUMBNAIL_VERSION,
             "youtube_thumbnail_insight_url": "https://insynergy.io/insights/example",
             "youtube_thumbnail_source_url": "https://images.example.test/example.png",
+            "youtube_thumbnail_template_version": YOUTUBE_THUMBNAIL_TEMPLATE_VERSION,
         }))
         self.assertFalse(thumbnail_is_fresh({}))
         self.assertFalse(thumbnail_is_fresh({
             "youtube_thumbnail_version": OG_THUMBNAIL_VERSION,
             "youtube_thumbnail_insight_url": "https://insynergy.io/insights/example",
             "youtube_thumbnail_source_url": "https://images.example.test/old.png",
+            "youtube_thumbnail_template_version": YOUTUBE_THUMBNAIL_TEMPLATE_VERSION,
         }, "https://insynergy.io/insights/example", "https://images.example.test/new.png"))
         self.assertFalse(thumbnail_is_fresh({
             "youtube_thumbnail_version": OG_THUMBNAIL_VERSION,
             "youtube_thumbnail_insight_url": "https://insynergy.io/insights/example",
             "youtube_thumbnail_source_url": "https://images.example.test/example.png",
             "youtube_thumbnail_source_sha256": "old",
+            "youtube_thumbnail_template_version": YOUTUBE_THUMBNAIL_TEMPLATE_VERSION,
         }, "https://insynergy.io/insights/example", "https://images.example.test/example.png", "new"))
 
     def test_existing_video_description_is_updated_without_reupload(self):

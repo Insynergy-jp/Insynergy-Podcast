@@ -27,6 +27,13 @@ youtube:
       https://insynergy.io/insights/why-finance-wont-let-ai-decide
   privacy_status: public
   category_id: "22"
+  thumbnail:
+    enabled: true
+    template_version: insynergy-youtube-editorial-v1
+    eyebrow: DECISION DESIGN
+    brand: INSYNERGY
+    accent: "#69AAFF"
+    wave_symbol: Podcast/Assets/insynergy-wave.png
   tags:
     - Decision Design
     - AI governance

@@ -55,6 +55,7 @@ class Episode:
     series_title: str | None = None
     series_sequence: int | None = None
     next_episode_id: str | None = None
+    youtube_thumbnail_text: str = ""
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -117,6 +118,9 @@ def parse_episode(path: Path, root: Path = ROOT) -> Episode:
     if series_sequence is not None and (not isinstance(series_sequence, int) or series_sequence < 1):
         raise PublishError(f"{path}: series.sequence must be a positive integer")
     next_episode_id = youtube.get("next_episode_id")
+    thumbnail_text = str(data.get("youtube_thumbnail_text") or "").strip()
+    if len(thumbnail_text) > 80:
+        raise PublishError(f"{path}: youtube_thumbnail_text must be 80 characters or fewer")
     return Episode(
         id=str(data["id"]), number=int(data["episode"]), title=str(data["title"]),
         slug=str(data["slug"]), description=str(data.get("description", "")),
@@ -128,6 +132,7 @@ def parse_episode(path: Path, root: Path = ROOT) -> Episode:
         series_title=(str(series["title"]) if series.get("title") else None),
         series_sequence=series_sequence,
         next_episode_id=(str(next_episode_id) if next_episode_id else None),
+        youtube_thumbnail_text=thumbnail_text,
         youtube_video_id=(str(data["youtube_video_id"]) if data.get("youtube_video_id") else None),
         manifest=path,
     )
