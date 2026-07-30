@@ -32,5 +32,9 @@
   "youtube_caption_timing": "audio-transcription-v1",
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "050021a719e115d1f368f976cdd5ce9a94bbf9f4462c1da48d1b7e572e180ee8",
-  "youtube_thumbnail_source_sha256": "7bfeef03742fde4966935fa9445ed0d0e691d38fba35f85046e9c0d6958d568d"
+  "youtube_thumbnail_source_sha256": "7bfeef03742fde4966935fa9445ed0d0e691d38fba35f85046e9c0d6958d568d",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "596e3a4443adcce7c7ef9b9491b3ac8a5785add92f8b34779ea2e7ec99ddc48d",
+  "youtube_thumbnail_text": "Headcount Is Not the Problem",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

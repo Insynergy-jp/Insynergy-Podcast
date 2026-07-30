@@ -32,5 +32,9 @@
   "youtube_caption_timing": "audio-transcription-v1",
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "3bb3c1e360a7443787b4e0db8851f0f738b4fa9f71a64d17dd45ded506ef743a",
-  "youtube_thumbnail_source_sha256": "98b2bcd0a18ee6c726354fbaf160ddc61701ce168344c934e97b3e8a44c0a366"
+  "youtube_thumbnail_source_sha256": "98b2bcd0a18ee6c726354fbaf160ddc61701ce168344c934e97b3e8a44c0a366",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "cbe170e25a8b81265347dabfcdc424876a56bf5e382b4e0a05cf3040fdf03263",
+  "youtube_thumbnail_text": "AI Does Not Replace Thinking",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

@@ -32,5 +32,9 @@
   "youtube_caption_timing": "audio-transcription-v1",
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "413a99bdfc88b2a597fd8f1737e1c5f3f85dfb79e8eb5a81737884e5ec5d8ba5",
-  "youtube_thumbnail_source_sha256": "a146768ae9a316cdd6722e757374705d54993aeb359dc776ba3ed955b503d6f3"
+  "youtube_thumbnail_source_sha256": "a146768ae9a316cdd6722e757374705d54993aeb359dc776ba3ed955b503d6f3",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "af28e16cb52611bc653ea15009b24f4973712eeba98d24a71195d4cb87085160",
+  "youtube_thumbnail_text": "When Software Stops Being the Place Where Work Happens",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

@@ -32,5 +32,9 @@
   "youtube_caption_timing": "audio-transcription-v1",
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "a53e308314e2b85c96b43b99cc5e0326fbadc30b1fe8c2a2a085f1ea5a889c14",
-  "youtube_thumbnail_source_sha256": "2b64f2ffc3bbcfa3449d5c715a7b9e865208dbe3e273486930570cad2db1dadd"
+  "youtube_thumbnail_source_sha256": "2b64f2ffc3bbcfa3449d5c715a7b9e865208dbe3e273486930570cad2db1dadd",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "aed8b384238ee8769ce93a0cbcc9ee8d0781ba06d94024921c7c7df3c362257e",
+  "youtube_thumbnail_text": "The Courage Layer",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

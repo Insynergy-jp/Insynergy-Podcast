@@ -32,5 +32,9 @@
   "youtube_caption_timing": "audio-transcription-v1",
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "0dfe34c9df6a753999682d7d8cb1df5009d2461af7e323c206589fdf17bc8019",
-  "youtube_thumbnail_source_sha256": "11ab5a7bd4b5145ba1ab8611cd8e2421d22539693a09f1c9bdd2640abb28ebe2"
+  "youtube_thumbnail_source_sha256": "11ab5a7bd4b5145ba1ab8611cd8e2421d22539693a09f1c9bdd2640abb28ebe2",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "b5c481fbab226ac8ecebdebc517910b7f470fefe583cf150a93756741bf70a3e",
+  "youtube_thumbnail_text": "The Formation Gap: Why Decision Design Must Become…",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

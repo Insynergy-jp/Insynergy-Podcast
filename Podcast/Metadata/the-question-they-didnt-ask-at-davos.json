@@ -32,5 +32,9 @@
   "youtube_description_version": "insynergy-youtube-details-v2",
   "youtube_description_insight_url": "https://insynergy.io/insights/the-question-they-didnt-ask-at-davos",
   "youtube_details_sha256": "ea2daf0d9695f9aab9d99d72de0cebfe090f8014dbc6b93477bc90195ba77cdd",
-  "youtube_thumbnail_source_sha256": "898d722f53c8af2320686ce91677235b5888e2d8210402037a09523eedddd43f"
+  "youtube_thumbnail_source_sha256": "898d722f53c8af2320686ce91677235b5888e2d8210402037a09523eedddd43f",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "63f87f7a11cb7f8f5e8231ed90bd93a1402d4d3c1691fa33d8e3134ffe1b0fcd",
+  "youtube_thumbnail_text": "The Question They Didn’t Ask at Davos",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

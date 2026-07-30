@@ -32,5 +32,9 @@
   "youtube_description_version": "insynergy-youtube-details-v2",
   "youtube_description_insight_url": "https://insynergy.io/insights/human-in-the-lead-end-of-a-comfortable-illusion",
   "youtube_details_sha256": "04df5d0f1065fd599894045c04712460b96e3af86a111b8ceb78d618d995422a",
-  "youtube_thumbnail_source_sha256": "981ca312681bce79ebcb2f75fe1fb7c80e96adccb9d6cc48958f5b42c3edb9fc"
+  "youtube_thumbnail_source_sha256": "981ca312681bce79ebcb2f75fe1fb7c80e96adccb9d6cc48958f5b42c3edb9fc",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "4939c9a4c5ae6d9aa5f3ff31f76197cd7e1399280e2d0db3d2b6119be0131638",
+  "youtube_thumbnail_text": "Human in the Lead: The End of a Comfortable Illusion",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

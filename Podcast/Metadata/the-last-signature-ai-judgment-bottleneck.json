@@ -32,5 +32,9 @@
   "youtube_description_version": "insynergy-youtube-details-v2",
   "youtube_description_insight_url": "https://insynergy.io/insights/the-last-signature-ai-judgment-bottleneck",
   "youtube_details_sha256": "45c517004f26d6c3ab29a1518b788d15a3a92851eaaac970d7209a2e17035973",
-  "youtube_thumbnail_source_sha256": "a6b11748a17820d50a5e4f426fd3dc234d44b20cd6dbafd78485ecfe9bcd09cc"
+  "youtube_thumbnail_source_sha256": "a6b11748a17820d50a5e4f426fd3dc234d44b20cd6dbafd78485ecfe9bcd09cc",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "052b7e866edece172fa4ec9a2c8ed58fbe3a65cfcf2957540113125d5678b422",
+  "youtube_thumbnail_text": "The Last Signature",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

@@ -32,5 +32,9 @@
   "youtube_caption_timing": "audio-transcription-v1",
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "dbd4e8e1ce6e308cd7f2b2970fa951a46dec8118c028c97f13378781e36b005d",
-  "youtube_thumbnail_source_sha256": "f93c1a2a1ab3ee2130be06f15167d95406b4c92e9dda81fdcf2f3b8bbbdc8d48"
+  "youtube_thumbnail_source_sha256": "f93c1a2a1ab3ee2130be06f15167d95406b4c92e9dda81fdcf2f3b8bbbdc8d48",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "086ccbbf27dede861922ccc3b051475ad3a63bc3a534a0c11cd3c6d03378140c",
+  "youtube_thumbnail_text": "AI Literacy Is Now a Job Requirement in VC",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

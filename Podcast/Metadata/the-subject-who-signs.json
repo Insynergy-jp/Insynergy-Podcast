@@ -32,5 +32,9 @@
   "youtube_description_version": "insynergy-youtube-details-v2",
   "youtube_description_insight_url": "https://insynergy.io/insights/the-subject-who-signs",
   "youtube_details_sha256": "eb539dbbf6c5b20170be177afc3aa1ca4f2588ba37a8f41576d1e4502b5f5df3",
-  "youtube_thumbnail_source_sha256": "1b75c65b30adb17520cf5b4f443a5f4cf2a9501b7f95f2890aadbaaec4cb65fb"
+  "youtube_thumbnail_source_sha256": "1b75c65b30adb17520cf5b4f443a5f4cf2a9501b7f95f2890aadbaaec4cb65fb",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "7c62c826688849ab2b94a38f6444083d672b1a01da31eddf218214d5f3d9f52b",
+  "youtube_thumbnail_text": "The Subject Who Signs",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

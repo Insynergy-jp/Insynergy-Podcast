@@ -32,5 +32,9 @@
   "youtube_caption_timing": "audio-transcription-v1",
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "9fdfcc20ebb6cbf951616afb9e00997f353c656b09e1a25e1446a1d022701ecc",
-  "youtube_thumbnail_source_sha256": "5f0e36eb0b7e86832ad2bcb8b852d8b89989563fcf4ef61a6359c87c75145f38"
+  "youtube_thumbnail_source_sha256": "5f0e36eb0b7e86832ad2bcb8b852d8b89989563fcf4ef61a6359c87c75145f38",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "6062fd7df4556d451ffb7457c043b0590408af5120c0018ae4b3a411e9424d0d",
+  "youtube_thumbnail_text": "LAYOFFS ≠ AI REPLACEMENT",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

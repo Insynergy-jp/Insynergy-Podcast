@@ -32,5 +32,9 @@
   "youtube_description_version": "insynergy-youtube-details-v2",
   "youtube_description_insight_url": "https://insynergy.io/insights/who-owns-judgment-in-the-age-of-ai",
   "youtube_details_sha256": "5269958a678949f593a9cda1eedfdc2aefaf005097486f60bce86e25cc853c14",
-  "youtube_thumbnail_source_sha256": "b6f89d669e6378b78e24009d21756e52e24f52df8989950a99affad2bc1a701b"
+  "youtube_thumbnail_source_sha256": "b6f89d669e6378b78e24009d21756e52e24f52df8989950a99affad2bc1a701b",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "03c98787aae9d4eb79a25c3d8ddb1e5be8c259fb541503098215cc09e67f36a6",
+  "youtube_thumbnail_text": "Who Owns Judgment in the Age of AI?",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

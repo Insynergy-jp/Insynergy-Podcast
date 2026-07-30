@@ -32,5 +32,9 @@
   "youtube_description_version": "insynergy-youtube-details-v2",
   "youtube_description_insight_url": "https://insynergy.io/insights/high-agency-and-the-design-of-judgment",
   "youtube_details_sha256": "b7da3a353ee00da9adc60d46524ef2158b24e82f07ff8ff4101d0a25e754c3ac",
-  "youtube_thumbnail_source_sha256": "4bf4ba7ca212a9160a68b52ff7f18d5c33739ed8baf8f4ac979bdaf8125ae2b7"
+  "youtube_thumbnail_source_sha256": "4bf4ba7ca212a9160a68b52ff7f18d5c33739ed8baf8f4ac979bdaf8125ae2b7",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "4bbec25be3c450c78ea515b890468fcccbf800c44b831f2febb2dfa8230ca02b",
+  "youtube_thumbnail_text": "Why \"High Agency\" Is Becoming the Defining Human…",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

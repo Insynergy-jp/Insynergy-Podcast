@@ -32,5 +32,9 @@
   "youtube_caption_timing": "audio-transcription-v1",
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "7202f97ae63b2e7b4e9453ba1ac6cf4487c6414cf733519977d17c69adbe9e8b",
-  "youtube_thumbnail_source_sha256": "2296b48d8cb968355504fda239874cea75d20e1a84fa1dd9583ba3a3ce1eb2c7"
+  "youtube_thumbnail_source_sha256": "2296b48d8cb968355504fda239874cea75d20e1a84fa1dd9583ba3a3ce1eb2c7",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "4588313d2771d0aa3360e3b32338a706f966f114253fdd87c599cf58a7732305",
+  "youtube_thumbnail_text": "When Intelligence Becomes Abundant, Judgment Becomes…",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

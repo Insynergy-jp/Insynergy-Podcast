@@ -32,5 +32,9 @@
   "youtube_caption_timing": "audio-transcription-v1",
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "0aa07c2e766c6c0f444665ac7ff4953352d461c1ff8515fe103de79e4fb9c00b",
-  "youtube_thumbnail_source_sha256": "8ced639e0f59193572bc4dca1f1bd49ad2ba31dc464b336a33208965bd08a708"
+  "youtube_thumbnail_source_sha256": "8ced639e0f59193572bc4dca1f1bd49ad2ba31dc464b336a33208965bd08a708",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "6370262b9f69a2648b7f588607b5a54470a162420455ea1caf43f6e6e0684877",
+  "youtube_thumbnail_text": "When the Web Stops Reading Us Back",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }

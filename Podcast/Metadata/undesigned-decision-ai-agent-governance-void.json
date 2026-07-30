@@ -32,5 +32,9 @@
   "youtube_caption_timing": "audio-transcription-v1",
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "7e4e1a514b85a56c4344069166bfff8e72da0b90b4fe9c6a8a1fb80d2a0f5828",
-  "youtube_thumbnail_source_sha256": "801ab37094b784152549bc70afa02b17f05a7786facb28d85378d835a9abefef"
+  "youtube_thumbnail_source_sha256": "801ab37094b784152549bc70afa02b17f05a7786facb28d85378d835a9abefef",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
+  "youtube_thumbnail_render_sha256": "ddf29365452adb7f464233720680dcd34e26a9862734889069f35c026b3a53c4",
+  "youtube_thumbnail_text": "The Undesigned Decision",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
 }
