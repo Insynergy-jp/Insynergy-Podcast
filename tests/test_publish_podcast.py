@@ -34,6 +34,7 @@ class PublishingTests(unittest.TestCase):
         self.assertEqual(episode.series_id, "ai-and-organizational-consequences")
         self.assertEqual(episode.series_sequence, 1)
         self.assertEqual(episode.next_episode_id, "DD-015")
+        self.assertEqual(episode.youtube_thumbnail_text, "LAYOFFS ≠ AI REPLACEMENT")
 
     def test_feed_contains_immutable_guid_and_enclosure(self):
         episode = pp.load_episodes()[0]
