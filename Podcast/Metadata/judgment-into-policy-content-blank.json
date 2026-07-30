@@ -33,8 +33,10 @@
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "78b20b3914ee6e427298b0ba00f94890a9a9d2f31de265eb9a11438e2245d338",
   "youtube_thumbnail_source_sha256": "6429996ac6b81854684e63560e68a6fbe486ef561bdb7829dfa19633b424f462",
-  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
-  "youtube_thumbnail_render_sha256": "76da27adcf47c14c4e27b24c2ee24f6c614cc70c59ec1a6e465e8e1f8f872fba",
-  "youtube_thumbnail_text": "The Government Wrote \"Judgment\" Into Policy",
-  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
+  "youtube_thumbnail_render_sha256": "3304a9c58d0d4093aedd37f8613e5f9ea7636e189800c7ae1daab43d03f6558b",
+  "youtube_thumbnail_text": "POLICY LEFT JUDGMENT BLANK",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
+  "youtube_thumbnail_emphasis": "JUDGMENT",
+  "youtube_thumbnail_fallback": null
 }

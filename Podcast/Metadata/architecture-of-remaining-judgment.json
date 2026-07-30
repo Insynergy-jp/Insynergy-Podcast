@@ -33,8 +33,10 @@
   "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/e44ee1ffe7af49838e3ae60e7bf09a0b/architecture-of-remaining-judgment.png",
   "youtube_details_sha256": "7ca07a66d1bd21a137aefd8d3810df8a578d3b8e1c562a0def844509cdc6ca24",
   "youtube_thumbnail_source_sha256": "9e8b325bd3ecc4ff4d842a2796385c359bf2e3997e528026fff3bd8649b502a4",
-  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
-  "youtube_thumbnail_render_sha256": "188fa49d04349be031870b272f5b4ed75d14abc3d8c5eebabc217584a1f65bfd",
-  "youtube_thumbnail_text": "The Architecture of Remaining Judgment",
-  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
+  "youtube_thumbnail_render_sha256": "dc83df2831793baef9ed73c18898b492b943571bd15453bb9168af4186ee6ea2",
+  "youtube_thumbnail_text": "JUDGMENT MUST STAY HUMAN",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
+  "youtube_thumbnail_emphasis": "STAY",
+  "youtube_thumbnail_fallback": null
 }

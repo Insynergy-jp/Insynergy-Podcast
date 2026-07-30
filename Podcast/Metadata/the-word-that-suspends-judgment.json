@@ -33,8 +33,10 @@
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "ec613c3bb616fd845c882648b43a92339c3cedd4d9387823e15c249a8da889ed",
   "youtube_thumbnail_source_sha256": "7ae2da950f87fe8e7af7e94125464d9b12a23afeb7834610b73efaf7bd575021",
-  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
-  "youtube_thumbnail_render_sha256": "7ec9546897e4e9033f4b80ef3ee51a45378e872931d55f1296f2639607c9f303",
-  "youtube_thumbnail_text": "The Word That Suspends Judgment",
-  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
+  "youtube_thumbnail_render_sha256": "6e418fe1cabf6ab1d7b1b2e16c6c012e755e01b37b2376b9905c3debbcc0db79",
+  "youtube_thumbnail_text": "ONE WORD SUSPENDS JUDGMENT",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
+  "youtube_thumbnail_emphasis": "SUSPENDS",
+  "youtube_thumbnail_fallback": null
 }

@@ -33,8 +33,10 @@
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "94525d93b4fbfc88379257767f777cc29852dd673ef46847ab9156d458fa83c2",
   "youtube_thumbnail_source_sha256": "b469f6fa8595040b20862d0fc566e2a0fd033fc595e37c015907704f0b5e9593",
-  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
-  "youtube_thumbnail_render_sha256": "cc577db26e866d142958d7a160395e31f7d3495c39e2d7cfe5080aa69e90090e",
-  "youtube_thumbnail_text": "The Performance Layer",
-  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
+  "youtube_thumbnail_render_sha256": "68af9eb6ebeb3a2caab91f028f585e6672e2aaf02165661f64d7972194e5abe9",
+  "youtube_thumbnail_text": "PERFORMANCE NEEDS A DECISION LAYER",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
+  "youtube_thumbnail_emphasis": "NEEDS",
+  "youtube_thumbnail_fallback": null
 }

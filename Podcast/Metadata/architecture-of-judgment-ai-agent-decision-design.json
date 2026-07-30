@@ -33,8 +33,10 @@
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "66efadd1ee81b946a313f71ac65908af4267be9202f0e99e600922a2d1aa23ec",
   "youtube_thumbnail_source_sha256": "14dd774a4e7623dd6b951dc5b30b808738cc14becbf35af15acac330fd749222",
-  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
-  "youtube_thumbnail_render_sha256": "51ec68492a3c32b36a262a05a69ea86abfbac67e9101ec093e4f258e19f991a1",
-  "youtube_thumbnail_text": "The Architecture of Judgment",
-  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
+  "youtube_thumbnail_render_sha256": "40d22a243fda64eaf8a1d055e4ac6e4531a2d1fcc34ef989c5c89b806abe804d",
+  "youtube_thumbnail_text": "AI AGENTS LACK A JUDGMENT LAYER",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
+  "youtube_thumbnail_emphasis": "LACK",
+  "youtube_thumbnail_fallback": null
 }

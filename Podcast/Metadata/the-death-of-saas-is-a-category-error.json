@@ -28,5 +28,15 @@
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_description_version": "insynergy-youtube-details-v2",
   "youtube_description_insight_url": "https://insynergy.io/insights/the-death-of-saas-is-a-category-error",
-  "youtube_details_sha256": "38b03ecfc060fd9b83968117981fe7a7e2c1b3eaf2614f5c36885d2aef438a21"
+  "youtube_details_sha256": "38b03ecfc060fd9b83968117981fe7a7e2c1b3eaf2614f5c36885d2aef438a21",
+  "youtube_thumbnail_version": "insynergy-insight-og-v1",
+  "youtube_thumbnail_insight_url": "https://insynergy.io/insights/the-death-of-saas-is-a-category-error",
+  "youtube_thumbnail_source_url": "https://insynergy-jp.github.io/Insynergy-Podcast/cover.jpg",
+  "youtube_thumbnail_source_sha256": "7db71cafbd487ea166e0f5d303ff73cc6a796f8fbfaee2c2fbe0ad74551ff15f",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
+  "youtube_thumbnail_render_sha256": "bfdf8c074e2bf8e75d9b74a2a03b0115bc1143b1a04a0911635dacc286a50086",
+  "youtube_thumbnail_text": "SAAS ISN'T DYING",
+  "youtube_thumbnail_emphasis": "ISN'T",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
+  "youtube_thumbnail_fallback": "podcast-cover"
 }

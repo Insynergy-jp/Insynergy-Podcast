@@ -33,8 +33,10 @@
   "youtube_description_insight_url": "https://insynergy.io/insights/why-finance-wont-let-ai-decide",
   "youtube_details_sha256": "cba7da50cd7b4791548c5f79665a1f182bdf20c1bc5c1ac1022b7a37880d69b1",
   "youtube_thumbnail_source_sha256": "818642fdda5f63e912d6c4634df97f8b07082427e3622e1a723ef2904b3d07f7",
-  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
-  "youtube_thumbnail_render_sha256": "37eff56c89e9079e286bdd2077ef7177dc7a90ad2c364f0381eb81ca23232b3c",
-  "youtube_thumbnail_text": "Why Finance Won’t Let AI Decide",
-  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
+  "youtube_thumbnail_render_sha256": "49d0af0d1ef740caefc8efee3073c8cc69b3789c7407de1fd773fd664518b10a",
+  "youtube_thumbnail_text": "FINANCE WON'T LET AI DECIDE",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
+  "youtube_thumbnail_emphasis": "WON'T",
+  "youtube_thumbnail_fallback": null
 }

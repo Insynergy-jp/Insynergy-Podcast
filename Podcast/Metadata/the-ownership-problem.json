@@ -33,8 +33,10 @@
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "634ebf155b747c533dd1c8af88cb297607b8a84046f1366299947f1e7b433afe",
   "youtube_thumbnail_source_sha256": "0d1409b8fabe46c9f9adc5a675bd87eb046ead35caa70546740ec3d3d5e3f2b9",
-  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
-  "youtube_thumbnail_render_sha256": "cbc90f621c2fe88c0c8d2397749a65d5f998349982e5e248026d35dc163e70aa",
-  "youtube_thumbnail_text": "The Ownership Problem",
-  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
+  "youtube_thumbnail_render_sha256": "2dc51a65625e89e8ebe3f6775472aac732c318afbfa8a40be5ba9a57b16b5296",
+  "youtube_thumbnail_text": "AI HAS AN OWNERSHIP PROBLEM",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
+  "youtube_thumbnail_emphasis": "OWNERSHIP",
+  "youtube_thumbnail_fallback": null
 }

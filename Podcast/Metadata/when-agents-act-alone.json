@@ -33,8 +33,10 @@
   "youtube_description_insight_url": "https://insynergy.io/insights/when-agents-act-alone",
   "youtube_details_sha256": "735a31719ad8beade3a8ba97848eeaccd31008a7321ba4a8493ebf5445989e76",
   "youtube_thumbnail_source_sha256": "1da9f510ead5098d631ac4fd8375b0d064157390f3916aeebd2aa56ce45c3543",
-  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
-  "youtube_thumbnail_render_sha256": "97dc0aaec3cd51c3cf0e70f6f932011ad885fb0f2178ed7f19d112f8fbc3f9d6",
-  "youtube_thumbnail_text": "When Agents Act Alone",
-  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
+  "youtube_thumbnail_render_sha256": "863d61b2114b92df4e2ee7908573fb42d8ade79c977c9e412ad1ad517822e83e",
+  "youtube_thumbnail_text": "AGENTS ACT WITHOUT YOU",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
+  "youtube_thumbnail_emphasis": "WITHOUT",
+  "youtube_thumbnail_fallback": null
 }

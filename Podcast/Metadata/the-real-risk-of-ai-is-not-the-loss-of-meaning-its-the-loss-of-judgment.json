@@ -33,8 +33,10 @@
   "youtube_description_insight_url": "https://insynergy.io/insights/decision-design-loss-of-judgment",
   "youtube_details_sha256": "a71b7d332ffc9a0765098b2228d0660d5d769070e5a3b9aa4bf4e7e19e5238fc",
   "youtube_thumbnail_source_sha256": "ce8e8cdbb6191b22aba13ab2f181d4c3009660aedefb40ddd9edac953710a643",
-  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
-  "youtube_thumbnail_render_sha256": "93b90d958c4c265ea041ea0f9679e79a67f47836f846f451d2b54bde512deca6",
-  "youtube_thumbnail_text": "The Real Risk of AI Is Not the Loss of Meaning",
-  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
+  "youtube_thumbnail_render_sha256": "d1386b20f20e41e8e817d93031f3171062260fe08fb13478093bb3f7c148d908",
+  "youtube_thumbnail_text": "AI PUTS JUDGMENT AT RISK",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
+  "youtube_thumbnail_emphasis": "JUDGMENT",
+  "youtube_thumbnail_fallback": null
 }

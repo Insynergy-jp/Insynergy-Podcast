@@ -33,8 +33,10 @@
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "7e3e80087a0f7cebc5d99fb8af2128d4ab5ea1699611fb33143cdef8684a7b8d",
   "youtube_thumbnail_source_sha256": "8bd175f296e0cfbf45076d3f34895e7edf91f9c65ab133cdd2de665e34265b36",
-  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
-  "youtube_thumbnail_render_sha256": "fe3ee174b2fdefeaf9977e2e79b093ada2c848d40fc4d5ae72589ffa9397e9bf",
-  "youtube_thumbnail_text": "What \"50% of Tasks Can Be Automated\" Fails to Measure",
-  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
+  "youtube_thumbnail_render_sha256": "3c94d56eec994551890c7a96bab5cd5696c59d3d959790e5547baa01f82bff9e",
+  "youtube_thumbnail_text": "METRICS MISS JUDGMENT",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
+  "youtube_thumbnail_emphasis": "MISS",
+  "youtube_thumbnail_fallback": null
 }

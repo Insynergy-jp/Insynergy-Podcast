@@ -33,8 +33,10 @@
   "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/2dd7a7363a9a4fc5b01a5bde6434c18a/Fair%20Use%20Was%20Designed%20for%20Humans.%20AI%20Doesn't%20Forget.png",
   "youtube_details_sha256": "d9c1d45c3271925cefdc424002eef01c0c8b1711a493e1d71928882f902277ce",
   "youtube_thumbnail_source_sha256": "d979ae662aebf1dbbe83283f1b2fb5d53116bd1eec049f3f02728bafd65be334",
-  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
-  "youtube_thumbnail_render_sha256": "d84c20544990298926b829938aa4f972a7c9bf121084f989d54bd16ad004ecd5",
-  "youtube_thumbnail_text": "FAIR USE vs MACHINE MEMORY",
-  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
+  "youtube_thumbnail_render_sha256": "5af3788b87dcdf5d1efe1504d1f3c8f542a08c830ec0a6d288eae2a746304c6f",
+  "youtube_thumbnail_text": "MACHINE MEMORY BREAKS FAIR USE",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
+  "youtube_thumbnail_emphasis": "BREAKS",
+  "youtube_thumbnail_fallback": null
 }
