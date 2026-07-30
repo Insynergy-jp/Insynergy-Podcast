@@ -29,6 +29,8 @@
   "youtube_thumbnail_version": "insynergy-insight-og-v1",
   "youtube_thumbnail_insight_url": "https://insynergy.io/insights/the-question-they-didnt-ask-at-davos",
   "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/c75b52a52bce474881057054f62970bd/TheQuestionTheyDidn'tAskAtDavos.png",
-  "youtube_description_version": "insynergy-insight-description-v1",
-  "youtube_description_insight_url": "https://insynergy.io/insights/the-question-they-didnt-ask-at-davos"
+  "youtube_description_version": "insynergy-youtube-details-v2",
+  "youtube_description_insight_url": "https://insynergy.io/insights/the-question-they-didnt-ask-at-davos",
+  "youtube_details_sha256": "ea2daf0d9695f9aab9d99d72de0cebfe090f8014dbc6b93477bc90195ba77cdd",
+  "youtube_thumbnail_source_sha256": "898d722f53c8af2320686ce91677235b5888e2d8210402037a09523eedddd43f"
 }

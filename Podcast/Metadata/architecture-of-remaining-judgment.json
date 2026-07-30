@@ -20,7 +20,7 @@
   "public_audio_file": "audio/dd-019-architecture-of-remaining-judgment.mp3",
   "youtube_video_id": "7hJG6xKanrs",
   "youtube_url": "https://youtu.be/7hJG6xKanrs",
-  "youtube_description_version": "insynergy-insight-description-v1",
+  "youtube_description_version": "insynergy-youtube-details-v2",
   "youtube_description_insight_url": "https://insynergy.io/insights/architecture-of-remaining-judgment",
   "youtube_caption_id": "AUieDabFUi7WSi53KL2Ie9taG9HfqMQM4HKS4rlTPwwz8LiLM1TuKh39",
   "youtube_caption_language": "en",
@@ -30,5 +30,7 @@
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_thumbnail_version": "insynergy-insight-og-v1",
   "youtube_thumbnail_insight_url": "https://insynergy.io/insights/architecture-of-remaining-judgment",
-  "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/e44ee1ffe7af49838e3ae60e7bf09a0b/architecture-of-remaining-judgment.png"
+  "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/e44ee1ffe7af49838e3ae60e7bf09a0b/architecture-of-remaining-judgment.png",
+  "youtube_details_sha256": "7ca07a66d1bd21a137aefd8d3810df8a578d3b8e1c562a0def844509cdc6ca24",
+  "youtube_thumbnail_source_sha256": "9e8b325bd3ecc4ff4d842a2796385c359bf2e3997e528026fff3bd8649b502a4"
 }

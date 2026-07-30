@@ -20,7 +20,7 @@
   "public_audio_file": "audio/dd-024-judgment-into-policy-content-blank.mp3",
   "youtube_video_id": "gDgZ4v-jxr0",
   "youtube_url": "https://youtu.be/gDgZ4v-jxr0",
-  "youtube_description_version": "insynergy-insight-description-v1",
+  "youtube_description_version": "insynergy-youtube-details-v2",
   "youtube_description_insight_url": "https://insynergy.io/insights/judgment-into-policy-content-blank",
   "youtube_thumbnail_version": "insynergy-insight-og-v1",
   "youtube_thumbnail_insight_url": "https://insynergy.io/insights/judgment-into-policy-content-blank",
@@ -30,5 +30,7 @@
   "youtube_japanese_caption_id": "AUieDaaBOdDvw_sgwPpR4iYCBH1BNNz9ZXIvl37HOUW3mDzjkpNYpF7ePZ4",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "youtube_details_sha256": "78b20b3914ee6e427298b0ba00f94890a9a9d2f31de265eb9a11438e2245d338",
+  "youtube_thumbnail_source_sha256": "6429996ac6b81854684e63560e68a6fbe486ef561bdb7829dfa19633b424f462"
 }

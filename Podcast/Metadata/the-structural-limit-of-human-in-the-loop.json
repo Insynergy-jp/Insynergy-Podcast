@@ -20,7 +20,7 @@
   "public_audio_file": "audio/dd-022-the-structural-limit-of-human-in-the-loop.mp3",
   "youtube_video_id": "y_H_UHSb59A",
   "youtube_url": "https://youtu.be/y_H_UHSb59A",
-  "youtube_description_version": "insynergy-insight-description-v1",
+  "youtube_description_version": "insynergy-youtube-details-v2",
   "youtube_description_insight_url": "https://insynergy.io/insights/the-structural-limit-of-human-in-the-loop",
   "youtube_caption_id": "AUieDaa-LizBgWSV93hp3qZ_CIwmKpYPxtihkxL6NK1kc9KZpS2XHHj0",
   "youtube_caption_language": "en",
@@ -30,5 +30,7 @@
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_thumbnail_version": "insynergy-insight-og-v1",
   "youtube_thumbnail_insight_url": "https://insynergy.io/insights/the-structural-limit-of-human-in-the-loop",
-  "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/78f4f43ea8e441e2abf9c33ae88dcf7f/The%20Structural%20Limit%20of%20Human-in-the-Loop.png"
+  "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/78f4f43ea8e441e2abf9c33ae88dcf7f/The%20Structural%20Limit%20of%20Human-in-the-Loop.png",
+  "youtube_details_sha256": "ad17ea4dea7abd10253df6d302dcfa5f234bf832129da845ee57844334323fe5",
+  "youtube_thumbnail_source_sha256": "3603de6114d879a64fbfd7fb3596c541b772e56e1a5f09fe290a6a3f317230b2"
 }

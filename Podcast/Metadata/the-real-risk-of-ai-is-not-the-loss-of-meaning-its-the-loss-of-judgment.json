@@ -29,6 +29,8 @@
   "youtube_thumbnail_version": "insynergy-insight-og-v1",
   "youtube_thumbnail_insight_url": "https://insynergy.io/insights/decision-design-loss-of-judgment",
   "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/357c107bb2844c5ab021e43429f9b729/TheLossOfJudgment.png",
-  "youtube_description_version": "insynergy-insight-description-v1",
-  "youtube_description_insight_url": "https://insynergy.io/insights/decision-design-loss-of-judgment"
+  "youtube_description_version": "insynergy-youtube-details-v2",
+  "youtube_description_insight_url": "https://insynergy.io/insights/decision-design-loss-of-judgment",
+  "youtube_details_sha256": "a71b7d332ffc9a0765098b2228d0660d5d769070e5a3b9aa4bf4e7e19e5238fc",
+  "youtube_thumbnail_source_sha256": "ce8e8cdbb6191b22aba13ab2f181d4c3009660aedefb40ddd9edac953710a643"
 }

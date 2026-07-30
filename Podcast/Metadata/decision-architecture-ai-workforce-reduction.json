@@ -20,7 +20,7 @@
   "public_audio_file": "audio/dd-032-decision-architecture-ai-workforce-reduction.mp3",
   "youtube_video_id": "GKd-Ncnlzpw",
   "youtube_url": "https://youtu.be/GKd-Ncnlzpw",
-  "youtube_description_version": "insynergy-insight-description-v1",
+  "youtube_description_version": "insynergy-youtube-details-v2",
   "youtube_description_insight_url": "https://insynergy.io/insights/decision-architecture-ai-workforce-reduction",
   "youtube_thumbnail_version": "insynergy-insight-og-v1",
   "youtube_thumbnail_insight_url": "https://insynergy.io/insights/decision-architecture-ai-workforce-reduction",
@@ -30,5 +30,7 @@
   "youtube_japanese_caption_id": "AUieDaZVtaBfW5oxG8LZGWi_H8gPQyIsSRakrxEebsPxPVcKemXbuP4HfY0",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "youtube_details_sha256": "050021a719e115d1f368f976cdd5ce9a94bbf9f4462c1da48d1b7e572e180ee8",
+  "youtube_thumbnail_source_sha256": "7bfeef03742fde4966935fa9445ed0d0e691d38fba35f85046e9c0d6958d568d"
 }

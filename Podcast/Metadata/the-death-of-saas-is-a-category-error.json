@@ -26,6 +26,7 @@
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
-  "youtube_description_version": "insynergy-insight-description-v1",
-  "youtube_description_insight_url": "https://insynergy.io/insights/the-death-of-saas-is-a-category-error"
+  "youtube_description_version": "insynergy-youtube-details-v2",
+  "youtube_description_insight_url": "https://insynergy.io/insights/the-death-of-saas-is-a-category-error",
+  "youtube_details_sha256": "38b03ecfc060fd9b83968117981fe7a7e2c1b3eaf2614f5c36885d2aef438a21"
 }

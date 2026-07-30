@@ -29,6 +29,8 @@
   "youtube_thumbnail_version": "insynergy-insight-og-v1",
   "youtube_thumbnail_insight_url": "https://insynergy.io/insights/when-agents-act-alone",
   "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/88a4f7f8e66b442c8da81f1ec6c0d0e7/73A9E8E1-0B4F-436A-8BB2-683EC6B0E7E3.png",
-  "youtube_description_version": "insynergy-insight-description-v1",
-  "youtube_description_insight_url": "https://insynergy.io/insights/when-agents-act-alone"
+  "youtube_description_version": "insynergy-youtube-details-v2",
+  "youtube_description_insight_url": "https://insynergy.io/insights/when-agents-act-alone",
+  "youtube_details_sha256": "735a31719ad8beade3a8ba97848eeaccd31008a7321ba4a8493ebf5445989e76",
+  "youtube_thumbnail_source_sha256": "1da9f510ead5098d631ac4fd8375b0d064157390f3916aeebd2aa56ce45c3543"
 }

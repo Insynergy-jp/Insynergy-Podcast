@@ -29,6 +29,8 @@
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
-  "youtube_description_version": "insynergy-insight-description-v1",
-  "youtube_description_insight_url": "https://insynergy.io/insights/quiet-disappearance-of-judgment-voice-ai-decision-design"
+  "youtube_description_version": "insynergy-youtube-details-v2",
+  "youtube_description_insight_url": "https://insynergy.io/insights/quiet-disappearance-of-judgment-voice-ai-decision-design",
+  "youtube_details_sha256": "e1556d472f2c92e030ef00058fb3889823bfbf4fd9f79604fe99cca541afc743",
+  "youtube_thumbnail_source_sha256": "1a27dbcbc478d4c6ea010b3607b24356ee988b2176271b752108170393835598"
 }

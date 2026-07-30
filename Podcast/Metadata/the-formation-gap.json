@@ -20,7 +20,7 @@
   "public_audio_file": "audio/dd-027-the-formation-gap.mp3",
   "youtube_video_id": "w5vwhPYMqeY",
   "youtube_url": "https://youtu.be/w5vwhPYMqeY",
-  "youtube_description_version": "insynergy-insight-description-v1",
+  "youtube_description_version": "insynergy-youtube-details-v2",
   "youtube_description_insight_url": "https://insynergy.io/insights/the-formation-gap",
   "youtube_thumbnail_version": "insynergy-insight-og-v1",
   "youtube_thumbnail_insight_url": "https://insynergy.io/insights/the-formation-gap",
@@ -30,5 +30,7 @@
   "youtube_japanese_caption_id": "AUieDaZ4wSWA6idS0cb_jc1LBKtc4NpKLF3x85f7Gw1Mw3bVefAlWbV0YTU",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "youtube_details_sha256": "0dfe34c9df6a753999682d7d8cb1df5009d2461af7e323c206589fdf17bc8019",
+  "youtube_thumbnail_source_sha256": "11ab5a7bd4b5145ba1ab8611cd8e2421d22539693a09f1c9bdd2640abb28ebe2"
 }
