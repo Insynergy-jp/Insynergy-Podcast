@@ -834,7 +834,41 @@ def publish_episode(
             )
             thumbnail = candidate
     except YouTubePublishError as exc:
-        print(f"Warning: {exc}; using the podcast cover for {episode.id}", file=sys.stderr)
+        cover_source = root / str(show["cover"])
+        if cover_source.is_file() and cover_source.stat().st_size:
+            thumbnail_page_url = article_url
+            thumbnail_source_url = f"{str(show['base_url']).rstrip('/')}/cover.jpg"
+            thumbnail_source_sha256 = hashlib.sha256(cover_source.read_bytes()).hexdigest()
+            thumbnail_render_hash = thumbnail_render_sha256(
+                thumbnail_source_sha256,
+                headline,
+                thumbnail_config,
+                wave_sha256,
+                episode.youtube_thumbnail_emphasis,
+            )
+            if not video_id or not thumbnail_is_fresh(
+                metadata,
+                thumbnail_page_url,
+                thumbnail_source_url,
+                thumbnail_source_sha256,
+                thumbnail_render_hash,
+                thumbnail_template_version,
+            ):
+                prepare_thumbnail(
+                    cover_source,
+                    candidate,
+                    headline,
+                    thumbnail_config,
+                    root,
+                    episode.youtube_thumbnail_emphasis,
+                )
+                thumbnail = candidate
+            print(
+                f"Warning: {exc}; rendered the podcast-cover fallback for {episode.id}",
+                file=sys.stderr,
+            )
+        else:
+            print(f"Warning: {exc}; using the podcast cover for {episode.id}", file=sys.stderr)
     if not video_id:
         video = root / "Podcast" / "YouTube" / f"{episode.slug}.mp4"
         render_video(audio, thumbnail or root / str(show["cover"]), video)
@@ -879,6 +913,9 @@ def publish_episode(
                 "youtube_thumbnail_text": headline,
                 "youtube_thumbnail_emphasis": episode.youtube_thumbnail_emphasis,
                 "youtube_thumbnail_wave_symbol_sha256": wave_sha256,
+                "youtube_thumbnail_fallback": (
+                    "podcast-cover" if thumbnail_source_url.endswith("/cover.jpg") else None
+                ),
             })
             metadata_path.write_text(
                 json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
