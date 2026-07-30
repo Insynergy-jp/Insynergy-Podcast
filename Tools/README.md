@@ -252,6 +252,15 @@ Insightの `og:image` はそのまま公開せず、YouTube専用の編集テン
 youtube_thumbnail_text: HUMAN REVIEW DOESN'T SCALE
 ```
 
+強調語を指定すると、その語を中央の大見出しとしてシアンからロイヤルブルーの
+グラデーションで描画し、前後の文言を上下へ配置します。右側のOG画像には、
+Decision Boundaryで停止するノード列を重ねます。強調語は見出し内に含めてください。
+
+```yaml
+youtube_thumbnail_text: WHY AI AGENTS FAIL IN PRACTICE
+youtube_thumbnail_emphasis: FAIL
+```
+
 テンプレートのブランド設定は `Podcast/podcast.yml` の `youtube.thumbnail` で管理します。元画像、見出し、色、ブランド設定、テンプレートバージョンから生成ハッシュを作成し、内容が変わった場合だけ既存YouTube動画のサムネイルを更新します。
 
 字幕文字起こしモデルは `whisper-1`、日本語翻訳モデルは既定で `gpt-5.4-mini` です。翻訳モデルだけを変更する場合はRepository Variableまたは環境変数 `OPENAI_CAPTION_TRANSLATION_MODEL` を設定します。

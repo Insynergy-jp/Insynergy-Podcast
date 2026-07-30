@@ -14,6 +14,7 @@ from youtube_publish import (
     CAPTION_TIMING_VERSION,
     ENGLISH_CAPTION_TEXT_VERSION,
     CAPTION_TRANSLATION_BATCH_SIZE,
+    LEGACY_YOUTUBE_THUMBNAIL_TEMPLATE_VERSION,
     OG_THUMBNAIL_VERSION,
     YOUTUBE_THUMBNAIL_TEMPLATE_VERSION,
     YOUTUBE_DESCRIPTION_VERSION,
@@ -183,6 +184,34 @@ class YouTubePublishingTests(unittest.TestCase):
                 self.assertNotEqual(rendered.getpixel((100, 100)), rendered.getpixel((900, 300)))
             self.assertLessEqual(destination.stat().st_size, 2_000_000)
 
+    def test_thumbnail_emphasis_uses_cyan_to_blue_gradient(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.png"
+            destination = root / "thumbnail.jpg"
+            Image.new("RGB", (1280, 720), "#D8DEE8").save(source)
+            prepare_thumbnail(
+                source,
+                destination,
+                "WHY AI AGENTS FAIL IN PRACTICE",
+                {"gradient_start": "#35D8F2", "gradient_end": "#3978F6"},
+                root,
+                "FAIL",
+            )
+            with Image.open(destination).convert("RGB") as rendered:
+                focus = rendered.crop((80, 250, 670, 470))
+                pixels = list(focus.get_flattened_data())
+                cyan_pixels = sum(
+                    1 for red, green, blue in pixels
+                    if green > 150 and blue > 180 and green > red + 40
+                )
+                royal_blue_pixels = sum(
+                    1 for red, green, blue in pixels
+                    if blue > 170 and blue > green + 15 and blue > red + 50
+                )
+            self.assertGreater(cyan_pixels, 500)
+            self.assertGreater(royal_blue_pixels, 500)
+
     def test_thumbnail_text_is_explicit_or_safely_shortened(self):
         from dataclasses import replace
         explicit = replace(self.episode(), youtube_thumbnail_text="A SHORT PROMISE")
@@ -197,6 +226,30 @@ class YouTubePublishingTests(unittest.TestCase):
         self.assertNotEqual(first, second)
         self.assertNotEqual(first, third)
         self.assertNotEqual(first, thumbnail_render_sha256("source", "FIRST", {"accent": "#69AAFF"}, "wave"))
+        self.assertNotEqual(
+            first,
+            thumbnail_render_sha256("source", "FIRST", {"accent": "#69AAFF"}, emphasis="FIRST"),
+        )
+        self.assertEqual(
+            first,
+            thumbnail_render_sha256(
+                "source",
+                "FIRST",
+                {"accent": "#69AAFF", "gradient_start": "#000000"},
+            ),
+        )
+
+    def test_legacy_thumbnail_does_not_require_v2_refresh(self):
+        metadata = {
+            "youtube_thumbnail_version": OG_THUMBNAIL_VERSION,
+            "youtube_thumbnail_insight_url": "https://insynergy.io/insights/example",
+            "youtube_thumbnail_source_url": "https://images.example.test/example.png",
+            "youtube_thumbnail_template_version": LEGACY_YOUTUBE_THUMBNAIL_TEMPLATE_VERSION,
+        }
+        self.assertTrue(thumbnail_is_fresh(
+            metadata,
+            template_version=LEGACY_YOUTUBE_THUMBNAIL_TEMPLATE_VERSION,
+        ))
 
     def test_wave_symbol_path_must_stay_inside_repository(self):
         with tempfile.TemporaryDirectory() as directory:

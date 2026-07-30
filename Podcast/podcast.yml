@@ -29,10 +29,13 @@ youtube:
   category_id: "22"
   thumbnail:
     enabled: true
-    template_version: insynergy-youtube-editorial-v1
+    template_version: insynergy-youtube-editorial-v2
     eyebrow: DECISION DESIGN
     brand: INSYNERGY
     accent: "#69AAFF"
+    gradient_start: "#35D8F2"
+    gradient_end: "#3978F6"
+    boundary_nodes: true
     wave_symbol: Podcast/Assets/insynergy-wave.png
   tags:
     - Decision Design
