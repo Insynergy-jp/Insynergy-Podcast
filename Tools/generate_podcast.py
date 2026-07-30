@@ -375,6 +375,20 @@ def narration_from_script_document(document: str) -> str:
     return body.strip()
 
 
+def compose_narration(script: str, channel_intro: str = "", subscription_cta: str = "") -> str:
+    """Add configured, deterministic branding without asking the text model to invent it."""
+    script = script.strip()
+    channel_intro = channel_intro.strip()
+    subscription_cta = subscription_cta.strip()
+    parts = []
+    if channel_intro and not script.startswith(channel_intro):
+        parts.append(channel_intro)
+    parts.append(script)
+    if subscription_cta and not script.endswith(subscription_cta):
+        parts.append(subscription_cta)
+    return "\n\n".join(parts)
+
+
 def build_metadata(*, title: str, source: Path, paths: OutputPaths, vault: Path, script: str, duration: int, generated_at: str, config: Config, voice: str, audio_created: bool) -> dict[str, Any]:
     relative = lambda path: path.relative_to(vault).as_posix()
     return {
@@ -422,6 +436,8 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--duration", type=int, default=8, help="Estimated duration in minutes (default: 8)")
     result.add_argument("--voice", help="TTS voice")
     result.add_argument("--style", choices=("executive", "academic", "keynote"), default="executive", help="Narration style profile")
+    result.add_argument("--channel-intro", default="", help="Deterministic narration prepended to a newly generated script")
+    result.add_argument("--subscription-cta", default="", help="Deterministic narration appended to a newly generated script")
     result.add_argument("--overwrite", action="store_true", help="Allow replacement of existing outputs")
     modes = result.add_mutually_exclusive_group()
     modes.add_argument("--script-only", action="store_true", help="Generate script and metadata only")
@@ -471,6 +487,11 @@ def run(args: argparse.Namespace) -> None:
         if not cleaned:
             raise PodcastError("No narratable content remained after Markdown cleaning.")
         script = generate_script(client, config.text_model, build_prompt(cleaned, source_metadata, args.duration, args.style))
+        script = compose_narration(
+            script,
+            getattr(args, "channel_intro", ""),
+            getattr(args, "subscription_cta", ""),
+        )
         atomic_write_text(paths.script, script_document(script, title=title, source=source_relative, duration=args.duration, generated_at=generated_at, config=config, voice=voice))
 
     errors = validate_script(script, raw, args.duration)
@@ -480,6 +501,11 @@ def run(args: argparse.Namespace) -> None:
             config.text_model,
             build_condense_prompt(script, source_metadata, args.duration, args.style),
             max_output_tokens=max(1024, args.duration * 210),
+        )
+        script = compose_narration(
+            script,
+            getattr(args, "channel_intro", ""),
+            getattr(args, "subscription_cta", ""),
         )
         atomic_write_text(
             paths.script,

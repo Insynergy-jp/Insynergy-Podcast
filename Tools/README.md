@@ -226,6 +226,22 @@ OG画像を取得できない場合は、公開処理を止めずに従来のPod
 
 YouTube動画の説明欄には、Episode概要、対応する `insynergy.io/insights` の記事URL、Podcastサイト、RSSを自動記載します。説明欄のバージョンと記事URLはEpisode metadataへ保存され、既存動画は再アップロードせず `videos.update` で説明欄だけを同期します。
 
+Episode manifestではPodcast/RSS用の `title` とYouTube用の `youtube_title` を分離できます。`youtube_title` を省略した場合は `title` を使います。`series` と `youtube.next_episode_id` を設定すると、シリーズ名と次に見る公開済み動画へのリンクを説明欄へ追加します。タイトル、説明、タグなどのYouTube snippetは内容ハッシュをEpisode metadataへ保存し、変更時だけ既存動画へ同期します。
+
+```yaml
+youtube_title: Human-in-the-Loop Has a Structural Limit
+series:
+  id: beyond-human-in-the-loop
+  title: Beyond Human-in-the-Loop
+  sequence: 1
+youtube:
+  next_episode_id: DD-007
+```
+
+`Podcast/podcast.yml` の `narration` では、生成する原稿の冒頭と末尾へ固定のチャンネル紹介と登録CTAを追加できます。本文は従来どおり記事から生成し、この固定文をLLMには作らせません。既存の新鮮な音声は自動再生成しないため、過去回にも適用する場合は明示的にforce regenerationを実行します。
+
+Insightの既存 `og:image` は毎回取得して内容SHA-256を比較します。Insight URL、画像URLまたは画像内容が変わった場合のみ1280×720・2MB以下のJPEGへ再変換し、既存動画のサムネイルだけを更新します。Insightページおよび元画像への書き戻しは行いません。
+
 字幕文字起こしモデルは `whisper-1`、日本語翻訳モデルは既定で `gpt-5.4-mini` です。翻訳モデルだけを変更する場合はRepository Variableまたは環境変数 `OPENAI_CAPTION_TRANSLATION_MODEL` を設定します。
 
 ### 初回OAuth設定

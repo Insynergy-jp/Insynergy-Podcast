@@ -1,6 +1,7 @@
 id: DD-022
 episode: 22
 title: The Structural Limit of Human-in-the-Loop
+youtube_title: Human-in-the-Loop Has a Structural Limit
 slug: the-structural-limit-of-human-in-the-loop
 description: >-
   Why human review becomes symbolic as AI scales—and how Design-in-the-Loop
@@ -13,3 +14,14 @@ duration_minutes: 10
 voice_style: academic
 source: Insights/the-structural-limit-of-human-in-the-loop.md
 episode_type: full
+series:
+  id: beyond-human-in-the-loop
+  title: Beyond Human-in-the-Loop
+  sequence: 1
+youtube:
+  next_episode_id: DD-007
+performance:
+  window_days: 28
+  captured_at: 2026-07-30
+  views: 31
+  impressions_ctr: 0.0211

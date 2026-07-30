@@ -1,6 +1,7 @@
 id: DD-014
 episode: 14
 title: The Layoffs Are Real. The Explanation Is Wrong.
+youtube_title: The Layoffs Are Real. AI Is Not the Whole Explanation.
 slug: decision-ownership-collapse
 description: >-
   Why the AI-replacement narrative misreads recent layoffs, and how the deeper
@@ -12,3 +13,15 @@ duration_minutes: 10
 voice_style: academic
 source: Insights/The Layoffs Are Real. The Explanation Is Wrong.md
 episode_type: full
+series:
+  id: ai-and-organizational-consequences
+  title: AI and the Architecture of Work
+  sequence: 1
+youtube:
+  next_episode_id: DD-015
+performance:
+  window_days: 28
+  captured_at: 2026-07-30
+  views: 69
+  impressions_ctr: 0.0242
+  watch_time_hours: 1.8

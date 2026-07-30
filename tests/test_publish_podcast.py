@@ -25,6 +25,16 @@ class PublishingTests(unittest.TestCase):
         episode = next(ep for ep in pp.load_episodes() if ep.id == "DD-017")
         self.assertEqual(episode.youtube_video_id, "OXF7nVRN2kQ")
 
+    def test_manifest_supports_youtube_title_series_and_next_episode(self):
+        episode = next(ep for ep in pp.load_episodes() if ep.id == "DD-014")
+        self.assertEqual(
+            episode.youtube_title,
+            "The Layoffs Are Real. AI Is Not the Whole Explanation.",
+        )
+        self.assertEqual(episode.series_id, "ai-and-organizational-consequences")
+        self.assertEqual(episode.series_sequence, 1)
+        self.assertEqual(episode.next_episode_id, "DD-015")
+
     def test_feed_contains_immutable_guid_and_enclosure(self):
         episode = pp.load_episodes()[0]
         show = pp.load_show()
