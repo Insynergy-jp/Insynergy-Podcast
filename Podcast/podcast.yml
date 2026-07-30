@@ -37,6 +37,15 @@ distribution:
   spotify: rss
   amazon_music_audible: rss
   youtube: direct_api
+narration:
+  channel_intro_enabled: true
+  subscription_cta_enabled: true
+  channel_intro: >-
+    This is the Decision Design Podcast from Insynergy, examining how judgment,
+    authority, and accountability must be redesigned for the age of AI.
+  subscription_cta: >-
+    If you want to keep exploring how organizations can preserve judgment in the
+    age of AI, subscribe to the Decision Design Podcast.
 voice_profiles:
   executive:
     voice: nova

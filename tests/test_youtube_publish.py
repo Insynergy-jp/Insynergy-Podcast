@@ -17,14 +17,17 @@ from youtube_publish import (
     YOUTUBE_DESCRIPTION_VERSION,
     YOUTUBE_CAPTION_SCOPE,
     YouTubeCredentials,
+    YouTubePublishError,
     build_timed_srt,
     captions_are_fresh,
     create_synced_caption_files,
+    details_fingerprint,
     description_is_fresh,
     existing_caption_ids,
     fetch_insight_og_image,
     insight_url,
     normalize_caption_text,
+    next_episode_url,
     prepare_thumbnail,
     publish_episode,
     render_video,
@@ -75,6 +78,26 @@ class YouTubePublishingTests(unittest.TestCase):
         )
         self.assertIn("Podcast RSS", body["snippet"]["description"])
         self.assertEqual(body["snippet"]["defaultLanguage"], "en")
+
+    def test_youtube_title_series_and_watch_next_are_used(self):
+        from dataclasses import replace
+        episode = replace(
+            self.episode(), youtube_title="A YouTube-Specific Title",
+            series_id="series", series_title="AI and the Architecture of Work",
+            series_sequence=2,
+        )
+        body = video_body(
+            episode, {"base_url": "https://example.test"}, {},
+            "https://youtu.be/next123",
+        )
+        self.assertEqual(body["snippet"]["title"], "A YouTube-Specific Title")
+        self.assertIn("Series: AI and the Architecture of Work · Episode 2", body["snippet"]["description"])
+        self.assertIn("Watch next:\nhttps://youtu.be/next123", body["snippet"]["description"])
+
+    def test_details_fingerprint_changes_with_editable_metadata(self):
+        first = video_body(self.episode(), {"base_url": "https://example.test"}, {"tags": ["one"]})
+        second = video_body(self.episode(), {"base_url": "https://example.test"}, {"tags": ["two"]})
+        self.assertNotEqual(details_fingerprint(first), details_fingerprint(second))
 
     @patch("youtube_publish.shutil.which", return_value="/usr/bin/ffmpeg")
     @patch("youtube_publish.MP3")
@@ -178,6 +201,17 @@ class YouTubePublishingTests(unittest.TestCase):
             "youtube_thumbnail_source_url": "https://images.example.test/example.png",
         }))
         self.assertFalse(thumbnail_is_fresh({}))
+        self.assertFalse(thumbnail_is_fresh({
+            "youtube_thumbnail_version": OG_THUMBNAIL_VERSION,
+            "youtube_thumbnail_insight_url": "https://insynergy.io/insights/example",
+            "youtube_thumbnail_source_url": "https://images.example.test/old.png",
+        }, "https://insynergy.io/insights/example", "https://images.example.test/new.png"))
+        self.assertFalse(thumbnail_is_fresh({
+            "youtube_thumbnail_version": OG_THUMBNAIL_VERSION,
+            "youtube_thumbnail_insight_url": "https://insynergy.io/insights/example",
+            "youtube_thumbnail_source_url": "https://images.example.test/example.png",
+            "youtube_thumbnail_source_sha256": "old",
+        }, "https://insynergy.io/insights/example", "https://images.example.test/example.png", "new"))
 
     def test_existing_video_description_is_updated_without_reupload(self):
         youtube = MagicMock()
@@ -198,6 +232,12 @@ class YouTubePublishingTests(unittest.TestCase):
             "youtube_description_insight_url": article_url,
         }, article_url))
         self.assertFalse(description_is_fresh({}, article_url))
+        fingerprint = details_fingerprint(body)
+        self.assertFalse(description_is_fresh({
+            "youtube_description_version": YOUTUBE_DESCRIPTION_VERSION,
+            "youtube_description_insight_url": article_url,
+            "youtube_details_sha256": "stale",
+        }, article_url, fingerprint))
 
     def test_existing_video_gets_og_thumbnail_without_reupload(self):
         episode = self.episode()
@@ -219,11 +259,16 @@ class YouTubePublishingTests(unittest.TestCase):
                 "youtube_caption_id": "en-id",
                 "youtube_japanese_caption_id": "ja-id",
             }), encoding="utf-8")
-            with (
-                patch("youtube_publish.fetch_insight_og_image", return_value=(
+            def fetch_og(_episode, _config, destination):
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(b"source image")
+                return (
                     "https://insynergy.io/insights/judgment-not-meaning",
                     "https://images.example.test/og.png",
-                )),
+                )
+
+            with (
+                patch("youtube_publish.fetch_insight_og_image", side_effect=fetch_og),
                 patch("youtube_publish.prepare_thumbnail"),
                 patch("youtube_publish.set_video_thumbnail") as set_thumbnail,
                 patch("youtube_publish.upload_video") as upload,
@@ -249,6 +294,10 @@ class YouTubePublishingTests(unittest.TestCase):
             self.assertEqual(
                 saved["youtube_thumbnail_source_url"], "https://images.example.test/og.png"
             )
+            self.assertEqual(
+                saved["youtube_thumbnail_source_sha256"],
+                __import__("hashlib").sha256(b"source image").hexdigest(),
+            )
 
     def test_manifest_video_id_is_persisted_before_later_api_failure(self):
         from dataclasses import replace
@@ -272,6 +321,7 @@ class YouTubePublishingTests(unittest.TestCase):
             }), encoding="utf-8")
             with (
                 patch("youtube_publish.upload_video") as upload,
+                patch("youtube_publish.fetch_insight_og_image", side_effect=YouTubePublishError("offline")),
                 patch("youtube_publish.update_video_details", side_effect=RuntimeError("quota exceeded")),
             ):
                 with self.assertRaisesRegex(RuntimeError, "quota exceeded"):

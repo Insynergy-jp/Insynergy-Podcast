@@ -57,6 +57,12 @@ def run(force: bool = False, strict_email: bool = False) -> None:
             "--style", episode.voice_style,
             "--overwrite",
         ]
+        narration = show.get("narration", {})
+        if isinstance(narration, dict):
+            if narration.get("channel_intro_enabled") and narration.get("channel_intro"):
+                command.extend(["--channel-intro", str(narration["channel_intro"])])
+            if narration.get("subscription_cta_enabled") and narration.get("subscription_cta"):
+                command.extend(["--subscription-cta", str(narration["subscription_cta"])])
         result = subprocess.run(command, cwd=ROOT, check=False)
         if result.returncode != 0:
             raise PublishError(f"Generation failed for {episode.id}")

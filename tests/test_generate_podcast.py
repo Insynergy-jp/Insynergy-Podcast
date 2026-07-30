@@ -13,6 +13,11 @@ import generate_podcast as gp
 
 
 class PodcastTests(unittest.TestCase):
+    def test_deterministic_intro_and_cta_are_added_once(self):
+        branded = gp.compose_narration("Body.", "Intro.", "Subscribe.")
+        self.assertEqual(branded, "Intro.\n\nBody.\n\nSubscribe.")
+        self.assertEqual(gp.compose_narration(branded, "Intro.", "Subscribe."), branded)
+
     def test_frontmatter_is_parsed_and_removed(self):
         metadata, body = gp.parse_frontmatter('---\ntitle: "A Title"\ntags: [ai, governance]\n---\n# Body')
         self.assertEqual(metadata["title"], "A Title")

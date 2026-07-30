@@ -12,3 +12,7 @@ duration_minutes: 10
 voice_style: academic
 source: Insights/Human in the Lead - The End of a Comfortable Illusion.md
 episode_type: full
+series:
+  id: beyond-human-in-the-loop
+  title: Beyond Human-in-the-Loop
+  sequence: 2

@@ -1,6 +1,7 @@
 id: DD-021
 episode: 21
 title: Fair Use Was Designed for Humans. AI Doesn’t Forget.
+youtube_title: Fair Use Breaks When Machines Never Forget
 slug: fair-use-machine-scale-memory
 description: >-
   Why the Anthropic settlement is the first structural stress test of
@@ -12,3 +13,8 @@ duration_minutes: 10
 voice_style: academic
 source: Insights/fair-use-machine-scale-memory.md
 episode_type: full
+performance:
+  window_days: 28
+  captured_at: 2026-07-30
+  views: 37
+  impressions_ctr: 0.0113

@@ -13,3 +13,7 @@ duration_minutes: 10
 voice_style: academic
 source: Insights/The Formation Gap- Why Decision Design Must Become Architecture for Judgment, Not Just Governance.md
 episode_type: full
+series:
+  id: ai-and-organizational-consequences
+  title: AI and the Architecture of Work
+  sequence: 3

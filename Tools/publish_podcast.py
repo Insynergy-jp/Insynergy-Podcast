@@ -50,6 +50,11 @@ class Episode:
     episode_type: str
     youtube_video_id: str | None
     manifest: Path
+    youtube_title: str = ""
+    series_id: str | None = None
+    series_title: str | None = None
+    series_sequence: int | None = None
+    next_episode_id: str | None = None
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -89,12 +94,40 @@ def parse_episode(path: Path, root: Path = ROOT) -> Episode:
         source.relative_to(root.resolve())
     except ValueError as exc:
         raise PublishError(f"{path}: source is outside the repository") from exc
+    series = data.get("series", {})
+    youtube = data.get("youtube", {})
+    performance = data.get("performance")
+    if series is None:
+        series = {}
+    if youtube is None:
+        youtube = {}
+    if not isinstance(series, dict):
+        raise PublishError(f"{path}: series must be a mapping")
+    if not isinstance(youtube, dict):
+        raise PublishError(f"{path}: youtube must be a mapping")
+    if performance is not None and not isinstance(performance, dict):
+        raise PublishError(f"{path}: performance must be a mapping")
+    explicit_youtube_title = data.get("youtube_title")
+    youtube_title = str(explicit_youtube_title or data["title"]).strip()
+    if not youtube_title:
+        raise PublishError(f"{path}: youtube_title must not be empty")
+    if explicit_youtube_title and len(youtube_title) > 100:
+        raise PublishError(f"{path}: youtube_title exceeds YouTube's 100-character limit")
+    series_sequence = series.get("sequence")
+    if series_sequence is not None and (not isinstance(series_sequence, int) or series_sequence < 1):
+        raise PublishError(f"{path}: series.sequence must be a positive integer")
+    next_episode_id = youtube.get("next_episode_id")
     return Episode(
         id=str(data["id"]), number=int(data["episode"]), title=str(data["title"]),
         slug=str(data["slug"]), description=str(data.get("description", "")),
         published=published, status=str(data["status"]), podcast=bool(data.get("podcast", False)),
         duration_minutes=int(data.get("duration_minutes", 8)), voice_style=str(data.get("voice_style", "executive")),
         source=source, episode_type=str(data.get("episode_type", "full")),
+        youtube_title=youtube_title,
+        series_id=(str(series["id"]) if series.get("id") else None),
+        series_title=(str(series["title"]) if series.get("title") else None),
+        series_sequence=series_sequence,
+        next_episode_id=(str(next_episode_id) if next_episode_id else None),
         youtube_video_id=(str(data["youtube_video_id"]) if data.get("youtube_video_id") else None),
         manifest=path,
     )
@@ -113,6 +146,16 @@ def load_episodes(root: Path = ROOT) -> list[Episode]:
             seen.add(value)
         if not episode.source.is_file():
             raise PublishError(f"Source file not found: {episode.source}")
+        if bool(episode.series_id) != bool(episode.series_title):
+            raise PublishError(f"{episode.manifest}: series.id and series.title must be set together")
+    known_ids = {episode.id for episode in episodes}
+    for episode in episodes:
+        if episode.next_episode_id == episode.id:
+            raise PublishError(f"{episode.manifest}: youtube.next_episode_id cannot reference itself")
+        if episode.next_episode_id and episode.next_episode_id not in known_ids:
+            raise PublishError(
+                f"{episode.manifest}: youtube.next_episode_id references unknown episode {episode.next_episode_id}"
+            )
     return episodes
 
 

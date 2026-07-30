@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -36,7 +37,8 @@ CAPTION_TRANSCRIPTION_MODEL = "whisper-1"
 DEFAULT_CAPTION_TRANSLATION_MODEL = "gpt-5.4-mini"
 CAPTION_TRANSLATION_BATCH_SIZE = 20
 OG_THUMBNAIL_VERSION = "insynergy-insight-og-v1"
-YOUTUBE_DESCRIPTION_VERSION = "insynergy-insight-description-v1"
+YOUTUBE_DETAILS_VERSION = "insynergy-youtube-details-v2"
+YOUTUBE_DESCRIPTION_VERSION = YOUTUBE_DETAILS_VERSION
 DEFAULT_INSIGHTS_BASE_URL = "https://insynergy.io/insights"
 MAX_HTML_BYTES = 2 * 1024 * 1024
 MAX_SOURCE_IMAGE_BYTES = 16 * 1024 * 1024
@@ -180,11 +182,28 @@ def set_video_thumbnail(youtube: Any, video_id: str, thumbnail: Path) -> None:
     ).execute()
 
 
-def thumbnail_is_fresh(metadata: Mapping[str, Any]) -> bool:
+def thumbnail_is_fresh(
+    metadata: Mapping[str, Any],
+    insight_page_url: str | None = None,
+    source_image_url: str | None = None,
+    source_sha256: str | None = None,
+) -> bool:
     return bool(
         metadata.get("youtube_thumbnail_version") == OG_THUMBNAIL_VERSION
         and metadata.get("youtube_thumbnail_source_url")
         and metadata.get("youtube_thumbnail_insight_url")
+        and (
+            insight_page_url is None
+            or metadata.get("youtube_thumbnail_insight_url") == insight_page_url
+        )
+        and (
+            source_image_url is None
+            or metadata.get("youtube_thumbnail_source_url") == source_image_url
+        )
+        and (
+            source_sha256 is None
+            or metadata.get("youtube_thumbnail_source_sha256") == source_sha256
+        )
     )
 
 
@@ -211,21 +230,32 @@ def render_video(audio: Path, cover: Path, destination: Path) -> None:
         raise YouTubePublishError("ffmpeg video render failed: " + result.stderr.strip())
 
 
-def video_body(episode: Episode, show: Mapping[str, Any], config: Mapping[str, Any]) -> dict[str, Any]:
+def video_body(
+    episode: Episode,
+    show: Mapping[str, Any],
+    config: Mapping[str, Any],
+    next_episode_url: str | None = None,
+) -> dict[str, Any]:
     base_url = str(show["base_url"]).rstrip("/")
     article_url = insight_url(episode, config)
-    description = (
-        f"Episode overview:\n{episode.description}\n\n"
-        f"Read the full Insynergy Insight:\n{article_url}\n\n"
+    sections = [f"Episode overview:\n{episode.description}"]
+    if episode.series_title:
+        sequence = f" · Episode {episode.series_sequence}" if episode.series_sequence else ""
+        sections.append(f"Series: {episode.series_title}{sequence}")
+    if next_episode_url:
+        sections.append(f"Watch next:\n{next_episode_url}")
+    sections.extend([
+        f"Read the full Insynergy Insight:\n{article_url}",
         f"Listen and subscribe: {base_url}/\n"
-        f"Podcast RSS: {base_url}/podcast.xml\n\n"
+        f"Podcast RSS: {base_url}/podcast.xml",
         "Decision Design is a judgment architecture framework proposed by Ryoji Morii, "
         "founder of Insynergy Inc., for structuring authority, accountability, and "
-        "decision boundaries in AI-augmented organizations."
-    )
+        "decision boundaries in AI-augmented organizations.",
+    ])
+    description = "\n\n".join(sections)
     return {
         "snippet": {
-            "title": episode.title[:100],
+            "title": (episode.youtube_title or episode.title)[:100],
             "description": description[:5000],
             "tags": [str(tag) for tag in config.get("tags", [])],
             "categoryId": str(config.get("category_id", "22")),
@@ -239,10 +269,22 @@ def video_body(episode: Episode, show: Mapping[str, Any], config: Mapping[str, A
     }
 
 
-def description_is_fresh(metadata: Mapping[str, Any], article_url: str) -> bool:
+def details_fingerprint(details: Mapping[str, Any]) -> str:
+    snippet = details.get("snippet", {})
+    canonical = json.dumps(snippet, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def description_is_fresh(
+    metadata: Mapping[str, Any], article_url: str, expected_fingerprint: str | None = None
+) -> bool:
     return bool(
         metadata.get("youtube_description_version") == YOUTUBE_DESCRIPTION_VERSION
         and metadata.get("youtube_description_insight_url") == article_url
+        and (
+            expected_fingerprint is None
+            or metadata.get("youtube_details_sha256") == expected_fingerprint
+        )
     )
 
 
@@ -459,7 +501,34 @@ def captions_are_fresh(metadata: Mapping[str, Any]) -> bool:
     )
 
 
-def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], config: Mapping[str, Any], root: Path = ROOT, openai_client: Any | None = None) -> str | None:
+def next_episode_url(
+    episode: Episode, episodes_by_id: Mapping[str, Episode], root: Path = ROOT
+) -> str | None:
+    if not episode.next_episode_id:
+        return None
+    target = episodes_by_id.get(episode.next_episode_id)
+    if target is None:
+        return None
+    video_id = target.youtube_video_id
+    if not video_id:
+        _, _, metadata_path = generated_paths(target, root)
+        if metadata_path.is_file():
+            try:
+                video_id = json.loads(metadata_path.read_text(encoding="utf-8")).get("youtube_video_id")
+            except (OSError, json.JSONDecodeError):
+                video_id = None
+    return f"https://youtu.be/{video_id}" if video_id else None
+
+
+def publish_episode(
+    youtube: Any,
+    episode: Episode,
+    show: Mapping[str, Any],
+    config: Mapping[str, Any],
+    root: Path = ROOT,
+    openai_client: Any | None = None,
+    episodes_by_id: Mapping[str, Episode] | None = None,
+) -> str | None:
     script, audio, metadata_path = generated_paths(episode, root)
     if not audio.is_file() or not script.is_file() or not metadata_path.is_file():
         raise YouTubePublishError(f"Generated podcast assets are missing for {episode.id}")
@@ -476,21 +545,26 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
         )
         print(f"YouTube video recovered: {episode.id} ({video_id})")
     article_url = insight_url(episode, config)
-    details = video_body(episode, show, config)
+    related_url = next_episode_url(episode, episodes_by_id or {}, root)
+    details = video_body(episode, show, config, related_url)
+    details_sha256 = details_fingerprint(details)
     thumbnail: Path | None = None
     thumbnail_page_url: str | None = None
     thumbnail_source_url: str | None = None
-    if not video_id or not thumbnail_is_fresh(metadata):
-        source_image = root / "Podcast" / "YouTube" / f"{episode.slug}.og-image"
-        candidate = root / "Podcast" / "YouTube" / f"{episode.slug}.thumbnail.jpg"
-        try:
-            thumbnail_page_url, thumbnail_source_url = fetch_insight_og_image(
-                episode, config, source_image
-            )
+    source_image = root / "Podcast" / "YouTube" / f"{episode.slug}.og-image"
+    candidate = root / "Podcast" / "YouTube" / f"{episode.slug}.thumbnail.jpg"
+    try:
+        thumbnail_page_url, thumbnail_source_url = fetch_insight_og_image(
+            episode, config, source_image
+        )
+        thumbnail_source_sha256 = hashlib.sha256(source_image.read_bytes()).hexdigest()
+        if not video_id or not thumbnail_is_fresh(
+            metadata, thumbnail_page_url, thumbnail_source_url, thumbnail_source_sha256
+        ):
             prepare_thumbnail(source_image, candidate)
             thumbnail = candidate
-        except YouTubePublishError as exc:
-            print(f"Warning: {exc}; using the podcast cover for {episode.id}", file=sys.stderr)
+    except YouTubePublishError as exc:
+        print(f"Warning: {exc}; using the podcast cover for {episode.id}", file=sys.stderr)
     if not video_id:
         video = root / "Podcast" / "YouTube" / f"{episode.slug}.mp4"
         render_video(audio, thumbnail or root / str(show["cover"]), video)
@@ -500,6 +574,7 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
             "youtube_url": f"https://youtu.be/{video_id}",
             "youtube_description_version": YOUTUBE_DESCRIPTION_VERSION,
             "youtube_description_insight_url": article_url,
+            "youtube_details_sha256": details_sha256,
         })
         metadata_path.write_text(
             json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
@@ -507,11 +582,12 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
         print(f"YouTube uploaded: {episode.id} https://youtu.be/{video_id}")
     else:
         print(f"YouTube video fresh: {episode.id} ({video_id})")
-        if not description_is_fresh(metadata, article_url):
+        if not description_is_fresh(metadata, article_url, details_sha256):
             update_video_details(youtube, str(video_id), details)
             metadata.update({
                 "youtube_description_version": YOUTUBE_DESCRIPTION_VERSION,
                 "youtube_description_insight_url": article_url,
+                "youtube_details_sha256": details_sha256,
             })
             metadata_path.write_text(
                 json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
@@ -527,6 +603,7 @@ def publish_episode(youtube: Any, episode: Episode, show: Mapping[str, Any], con
                 "youtube_thumbnail_version": OG_THUMBNAIL_VERSION,
                 "youtube_thumbnail_insight_url": thumbnail_page_url,
                 "youtube_thumbnail_source_url": thumbnail_source_url,
+                "youtube_thumbnail_source_sha256": thumbnail_source_sha256,
             })
             metadata_path.write_text(
                 json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
@@ -602,13 +679,15 @@ def run(episode_id: str | None = None) -> int:
         print("YouTube credentials are not configured; skipping upload")
         return 0
     youtube = build("youtube", "v3", credentials=credentials.google_credentials(), cache_discovery=False)
-    episodes = [e for e in load_episodes() if e.podcast and e.status == "published"]
+    all_episodes = load_episodes()
+    episodes_by_id = {episode.id: episode for episode in all_episodes}
+    episodes = [e for e in all_episodes if e.podcast and e.status == "published"]
     if episode_id:
         episodes = [e for e in episodes if e.id == episode_id]
         if not episodes:
             raise YouTubePublishError(f"Published episode not found: {episode_id}")
     for episode in episodes:
-        publish_episode(youtube, episode, show, config)
+        publish_episode(youtube, episode, show, config, episodes_by_id=episodes_by_id)
     return 0
 
 
