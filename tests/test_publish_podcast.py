@@ -34,12 +34,21 @@ class PublishingTests(unittest.TestCase):
         self.assertEqual(episode.series_id, "ai-and-organizational-consequences")
         self.assertEqual(episode.series_sequence, 1)
         self.assertEqual(episode.next_episode_id, "DD-015")
-        self.assertEqual(episode.youtube_thumbnail_text, "LAYOFFS ≠ AI REPLACEMENT")
+        self.assertEqual(episode.youtube_thumbnail_text, "AI DIDN'T CAUSE LAYOFFS")
+        self.assertEqual(episode.youtube_thumbnail_emphasis, "DIDN'T")
 
     def test_manifest_supports_thumbnail_emphasis(self):
         episode = next(ep for ep in pp.load_episodes() if ep.id == "DD-038")
         self.assertEqual(episode.youtube_thumbnail_text, "WHY AI AGENTS FAIL IN PRACTICE")
         self.assertEqual(episode.youtube_thumbnail_emphasis, "FAIL")
+
+    def test_all_published_episodes_use_the_v2_thumbnail_fields(self):
+        published = [episode for episode in pp.load_episodes() if episode.status == "published"]
+        self.assertTrue(published)
+        for episode in published:
+            with self.subTest(episode=episode.id):
+                self.assertTrue(episode.youtube_thumbnail_text)
+                self.assertTrue(episode.youtube_thumbnail_emphasis)
 
     def test_feed_contains_immutable_guid_and_enclosure(self):
         episode = pp.load_episodes()[0]

@@ -1,6 +1,8 @@
 id: DD-025
 episode: 25
 title: 'The Architecture of Judgment: What a Japanese Deployment Reveals About the Missing Layer in Enterprise AI Agents'
+youtube_thumbnail_text: AI AGENTS LACK A JUDGMENT LAYER
+youtube_thumbnail_emphasis: LACK
 slug: architecture-of-judgment-ai-agent-decision-design
 description: >-
   What JTB's enterprise AI-agent deployment reveals about decomposing judgment,

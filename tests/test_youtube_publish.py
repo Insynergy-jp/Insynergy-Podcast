@@ -378,6 +378,61 @@ class YouTubePublishingTests(unittest.TestCase):
                 __import__("hashlib").sha256(b"source image").hexdigest(),
             )
 
+    def test_existing_video_gets_branded_cover_fallback_without_reupload(self):
+        from dataclasses import replace
+
+        episode = replace(
+            self.episode(),
+            youtube_thumbnail_text="SAAS ISN'T DYING",
+            youtube_thumbnail_emphasis="ISN'T",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ("Scripts", "Audio", "Metadata", "Assets"):
+                (root / "Podcast" / name).mkdir(parents=True, exist_ok=True)
+            (root / "Podcast" / "Scripts" / f"{episode.slug}-podcast.md").write_text(
+                "script", encoding="utf-8"
+            )
+            (root / "Podcast" / "Audio" / f"{episode.slug}.mp3").write_bytes(b"audio")
+            Image.new("RGB", (1400, 1400), "#101820").save(
+                root / "Podcast" / "Assets" / "cover.jpg"
+            )
+            metadata_path = root / "Podcast" / "Metadata" / f"{episode.slug}.json"
+            metadata_path.write_text(json.dumps({
+                "youtube_video_id": "existing-video",
+                "youtube_caption_timing": CAPTION_TIMING_VERSION,
+                "youtube_english_caption_text_version": ENGLISH_CAPTION_TEXT_VERSION,
+                "youtube_caption_id": "en-id",
+                "youtube_japanese_caption_id": "ja-id",
+            }), encoding="utf-8")
+            with (
+                patch("youtube_publish.fetch_insight_og_image", side_effect=YouTubePublishError("404")),
+                patch("youtube_publish.set_video_thumbnail") as set_thumbnail,
+                patch("youtube_publish.upload_video") as upload,
+                patch("youtube_publish.update_video_details"),
+            ):
+                publish_episode(
+                    MagicMock(),
+                    episode,
+                    {
+                        "cover": "Podcast/Assets/cover.jpg",
+                        "base_url": "https://example.test",
+                    },
+                    {},
+                    root,
+                )
+            upload.assert_not_called()
+            set_thumbnail.assert_called_once()
+            saved = json.loads(metadata_path.read_text(encoding="utf-8"))
+            self.assertEqual(saved["youtube_thumbnail_fallback"], "podcast-cover")
+            self.assertEqual(
+                saved["youtube_thumbnail_source_url"], "https://example.test/cover.jpg"
+            )
+            self.assertEqual(
+                saved["youtube_thumbnail_template_version"],
+                YOUTUBE_THUMBNAIL_TEMPLATE_VERSION,
+            )
+
     def test_manifest_video_id_is_persisted_before_later_api_failure(self):
         from dataclasses import replace
 
