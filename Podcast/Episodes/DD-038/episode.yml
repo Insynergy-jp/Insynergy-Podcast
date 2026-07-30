@@ -2,7 +2,8 @@ id: DD-038
 episode: 38
 title: Why AI Agents Fail in Practice — And Why Architecture Alone Won't Fix It
 youtube_title: Why AI Agents Fail—and Why Architecture Alone Won't Fix It
-youtube_thumbnail_text: ARCHITECTURE ALONE WON'T FIX IT
+youtube_thumbnail_text: WHY AI AGENTS FAIL IN PRACTICE
+youtube_thumbnail_emphasis: FAIL
 slug: why-ai-agents-fail-decision-boundary-design
 description: >-
   Why constraints, validation, observability, and escalation are not enough to

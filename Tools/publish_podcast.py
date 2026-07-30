@@ -56,6 +56,7 @@ class Episode:
     series_sequence: int | None = None
     next_episode_id: str | None = None
     youtube_thumbnail_text: str = ""
+    youtube_thumbnail_emphasis: str = ""
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -121,6 +122,15 @@ def parse_episode(path: Path, root: Path = ROOT) -> Episode:
     thumbnail_text = str(data.get("youtube_thumbnail_text") or "").strip()
     if len(thumbnail_text) > 80:
         raise PublishError(f"{path}: youtube_thumbnail_text must be 80 characters or fewer")
+    thumbnail_emphasis = str(data.get("youtube_thumbnail_emphasis") or "").strip()
+    if len(thumbnail_emphasis) > 24:
+        raise PublishError(f"{path}: youtube_thumbnail_emphasis must be 24 characters or fewer")
+    if thumbnail_emphasis and not re.search(
+        rf"(?<!\w){re.escape(thumbnail_emphasis)}(?!\w)", thumbnail_text, flags=re.IGNORECASE
+    ):
+        raise PublishError(
+            f"{path}: youtube_thumbnail_emphasis must appear in youtube_thumbnail_text"
+        )
     return Episode(
         id=str(data["id"]), number=int(data["episode"]), title=str(data["title"]),
         slug=str(data["slug"]), description=str(data.get("description", "")),
@@ -133,6 +143,7 @@ def parse_episode(path: Path, root: Path = ROOT) -> Episode:
         series_sequence=series_sequence,
         next_episode_id=(str(next_episode_id) if next_episode_id else None),
         youtube_thumbnail_text=thumbnail_text,
+        youtube_thumbnail_emphasis=thumbnail_emphasis,
         youtube_video_id=(str(data["youtube_video_id"]) if data.get("youtube_video_id") else None),
         manifest=path,
     )

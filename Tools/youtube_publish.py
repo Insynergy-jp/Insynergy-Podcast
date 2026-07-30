@@ -38,7 +38,8 @@ CAPTION_TRANSCRIPTION_MODEL = "whisper-1"
 DEFAULT_CAPTION_TRANSLATION_MODEL = "gpt-5.4-mini"
 CAPTION_TRANSLATION_BATCH_SIZE = 20
 OG_THUMBNAIL_VERSION = "insynergy-insight-og-v1"
-YOUTUBE_THUMBNAIL_TEMPLATE_VERSION = "insynergy-youtube-editorial-v1"
+LEGACY_YOUTUBE_THUMBNAIL_TEMPLATE_VERSION = "insynergy-youtube-editorial-v1"
+YOUTUBE_THUMBNAIL_TEMPLATE_VERSION = "insynergy-youtube-editorial-v2"
 YOUTUBE_DETAILS_VERSION = "insynergy-youtube-details-v2"
 YOUTUBE_DESCRIPTION_VERSION = YOUTUBE_DETAILS_VERSION
 DEFAULT_INSIGHTS_BASE_URL = "https://insynergy.io/insights"
@@ -192,6 +193,54 @@ def _wrap_text(draw: ImageDraw.ImageDraw, text: str, font: Any, max_width: int) 
     return lines
 
 
+def _hex_rgb(value: str, fallback: str) -> tuple[int, int, int]:
+    selected = value.strip() if re.fullmatch(r"#[0-9A-Fa-f]{6}", value.strip()) else fallback
+    return tuple(int(selected[index:index + 2], 16) for index in (1, 3, 5))
+
+
+def _gradient_text(
+    canvas: Image.Image,
+    position: tuple[int, int],
+    text: str,
+    font: Any,
+    start_color: str,
+    end_color: str,
+) -> None:
+    mask = Image.new("L", canvas.size, 0)
+    mask_draw = ImageDraw.Draw(mask)
+    mask_draw.text(position, text, font=font, fill=255, stroke_width=1, stroke_fill=255)
+    left, top, right, bottom = mask.getbbox() or (0, 0, 1, 1)
+    start = _hex_rgb(start_color, "#35D8F2")
+    end = _hex_rgb(end_color, "#3978F6")
+    gradient = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    pixels = gradient.load()
+    span = max(1, right - left - 1)
+    for x in range(left, right):
+        ratio = (x - left) / span
+        color = tuple(round(a + (b - a) * ratio) for a, b in zip(start, end))
+        for y in range(top, bottom):
+            pixels[x, y] = (*color, 255)
+    canvas.alpha_composite(Image.composite(gradient, Image.new("RGBA", canvas.size), mask))
+
+
+def _draw_boundary_nodes(canvas: Image.Image, card_origin: tuple[int, int], accent: str) -> None:
+    x0, y0 = card_origin
+    y = y0 + 266
+    end_x = x0 + 206
+    glow = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    glow_draw = ImageDraw.Draw(glow)
+    color = _hex_rgb(accent, "#69AAFF")
+    glow_draw.line((x0 + 30, y, end_x, y), fill=(*color, 170), width=4)
+    for x in (x0 + 42, x0 + 94, x0 + 146, end_x):
+        glow_draw.ellipse((x - 12, y - 12, x + 12, y + 12), fill=(*color, 110))
+    glow = glow.filter(ImageFilter.GaussianBlur(radius=8))
+    canvas.alpha_composite(glow)
+    draw = ImageDraw.Draw(canvas)
+    draw.line((x0 + 30, y, end_x, y), fill=(225, 252, 255, 235), width=3)
+    for x in (x0 + 42, x0 + 94, x0 + 146, end_x):
+        draw.ellipse((x - 9, y - 9, x + 9, y + 9), fill=(*color, 230), outline="#FFFFFF", width=3)
+
+
 def wave_symbol_path(config: Mapping[str, Any], root: Path = ROOT) -> Path | None:
     configured = str(config.get("wave_symbol", "")).strip()
     if not configured:
@@ -211,16 +260,28 @@ def thumbnail_render_sha256(
     headline: str,
     config: Mapping[str, Any],
     wave_sha256: str = "",
+    emphasis: str = "",
 ) -> str:
+    template_version = (
+        YOUTUBE_THUMBNAIL_TEMPLATE_VERSION
+        if emphasis else LEGACY_YOUTUBE_THUMBNAIL_TEMPLATE_VERSION
+    )
     payload = {
         "source_sha256": source_sha256,
         "headline": headline,
-        "template_version": YOUTUBE_THUMBNAIL_TEMPLATE_VERSION,
+        "template_version": template_version,
         "eyebrow": str(config.get("eyebrow", "DECISION DESIGN")),
         "brand": str(config.get("brand", "INSYNERGY")),
         "accent": str(config.get("accent", "#69AAFF")),
         "wave_sha256": wave_sha256,
     }
+    if emphasis:
+        payload.update({
+            "gradient_start": str(config.get("gradient_start", "#35D8F2")),
+            "gradient_end": str(config.get("gradient_end", "#3978F6")),
+            "boundary_nodes": bool(config.get("boundary_nodes", True)),
+            "emphasis": emphasis,
+        })
     encoded = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
@@ -231,6 +292,7 @@ def prepare_thumbnail(
     headline: str = "Decision Design",
     config: Mapping[str, Any] | None = None,
     root: Path = ROOT,
+    emphasis: str = "",
 ) -> None:
     config = config or {}
     if not source.is_file() or source.stat().st_size == 0:
@@ -252,29 +314,70 @@ def prepare_thumbnail(
     draw = ImageDraw.Draw(canvas)
 
     accent = str(config.get("accent", "#69AAFF"))
-    draw.rounded_rectangle((746, 92, 1190, 628), radius=24, fill=(255, 255, 255, 28), outline=(255, 255, 255, 70), width=2)
+    if emphasis:
+        draw.rounded_rectangle((746, 92, 1190, 628), radius=24, fill="#FFFFFF")
+    else:
+        draw.rounded_rectangle(
+            (746, 92, 1190, 628),
+            radius=24,
+            fill=(255, 255, 255, 28),
+            outline=(255, 255, 255, 70),
+            width=2,
+        )
     card = ImageOps.fit(original, (412, 504), method=Image.Resampling.LANCZOS)
     mask = Image.new("L", card.size, 0)
     ImageDraw.Draw(mask).rounded_rectangle((0, 0, card.width, card.height), radius=18, fill=255)
     canvas.paste(card, (762, 108), mask)
+    if emphasis and bool(config.get("boundary_nodes", True)):
+        _draw_boundary_nodes(canvas, (762, 108), accent)
 
     draw.rounded_rectangle((80, 88, 92, 142), radius=6, fill=accent)
     eyebrow_font = _font(24, bold=True)
     draw.text((112, 96), str(config.get("eyebrow", "DECISION DESIGN")), font=eyebrow_font, fill=accent, spacing=4)
 
     headline = headline.strip() or "Decision Design"
-    font_size = 68
-    while font_size >= 46:
-        headline_font = _font(font_size, bold=True)
-        lines = _wrap_text(draw, headline, headline_font, 590)
-        if len(lines) <= 4:
-            break
-        font_size -= 4
-    line_height = font_size + 13
-    y = 190
-    for line in lines[:4]:
-        draw.text((80, y), line, font=headline_font, fill="#FFFFFF", stroke_width=1, stroke_fill="#0B111B")
-        y += line_height
+    match = re.search(rf"(?<!\w){re.escape(emphasis)}(?!\w)", headline, flags=re.IGNORECASE) if emphasis else None
+    if match:
+        prefix = headline[:match.start()].strip()
+        focus = headline[match.start():match.end()]
+        suffix = headline[match.end():].strip()
+        supporting_font = _font(55, bold=True)
+        prefix_lines = _wrap_text(draw, prefix, supporting_font, 590) if prefix else []
+        suffix_lines = _wrap_text(draw, suffix, supporting_font, 590) if suffix else []
+        y = 188
+        for line in prefix_lines[-1:]:
+            draw.text((80, y), line, font=supporting_font, fill="#FFFFFF", stroke_width=1, stroke_fill="#0B111B")
+            y += 76
+        focus_size = 220
+        while focus_size >= 100:
+            focus_font = _font(focus_size, bold=True)
+            if draw.textbbox((0, 0), focus, font=focus_font)[2] <= 590:
+                break
+            focus_size -= 4
+        _gradient_text(
+            canvas,
+            (80, y - 22),
+            focus,
+            focus_font,
+            str(config.get("gradient_start", "#35D8F2")),
+            str(config.get("gradient_end", "#3978F6")),
+        )
+        y += focus_size - 8
+        for line in suffix_lines[:1]:
+            draw.text((80, y), line, font=supporting_font, fill="#FFFFFF", stroke_width=1, stroke_fill="#0B111B")
+    else:
+        font_size = 68
+        while font_size >= 46:
+            headline_font = _font(font_size, bold=True)
+            lines = _wrap_text(draw, headline, headline_font, 590)
+            if len(lines) <= 4:
+                break
+            font_size -= 4
+        line_height = font_size + 13
+        y = 190
+        for line in lines[:4]:
+            draw.text((80, y), line, font=headline_font, fill="#FFFFFF", stroke_width=1, stroke_fill="#0B111B")
+            y += line_height
 
     draw.line((80, 580, 650, 580), fill=(255, 255, 255, 55), width=2)
     brand_x = 80
@@ -318,6 +421,7 @@ def thumbnail_is_fresh(
     source_image_url: str | None = None,
     source_sha256: str | None = None,
     render_sha256: str | None = None,
+    template_version: str = YOUTUBE_THUMBNAIL_TEMPLATE_VERSION,
 ) -> bool:
     return bool(
         metadata.get("youtube_thumbnail_version") == OG_THUMBNAIL_VERSION
@@ -335,7 +439,7 @@ def thumbnail_is_fresh(
             source_sha256 is None
             or metadata.get("youtube_thumbnail_source_sha256") == source_sha256
         )
-        and metadata.get("youtube_thumbnail_template_version") == YOUTUBE_THUMBNAIL_TEMPLATE_VERSION
+        and metadata.get("youtube_thumbnail_template_version") == template_version
         and (
             render_sha256 is None
             or metadata.get("youtube_thumbnail_render_sha256") == render_sha256
@@ -691,6 +795,11 @@ def publish_episode(
     if not isinstance(thumbnail_config, Mapping):
         raise YouTubePublishError("youtube.thumbnail must be a mapping")
     headline = thumbnail_text(episode)
+    thumbnail_template_version = (
+        YOUTUBE_THUMBNAIL_TEMPLATE_VERSION
+        if episode.youtube_thumbnail_emphasis
+        else LEGACY_YOUTUBE_THUMBNAIL_TEMPLATE_VERSION
+    )
     wave = wave_symbol_path(thumbnail_config, root)
     wave_sha256 = hashlib.sha256(wave.read_bytes()).hexdigest() if wave else ""
     source_image = root / "Podcast" / "YouTube" / f"{episode.slug}.og-image"
@@ -701,7 +810,11 @@ def publish_episode(
         )
         thumbnail_source_sha256 = hashlib.sha256(source_image.read_bytes()).hexdigest()
         thumbnail_render_hash = thumbnail_render_sha256(
-            thumbnail_source_sha256, headline, thumbnail_config, wave_sha256
+            thumbnail_source_sha256,
+            headline,
+            thumbnail_config,
+            wave_sha256,
+            episode.youtube_thumbnail_emphasis,
         )
         if not video_id or not thumbnail_is_fresh(
             metadata,
@@ -709,8 +822,16 @@ def publish_episode(
             thumbnail_source_url,
             thumbnail_source_sha256,
             thumbnail_render_hash,
+            thumbnail_template_version,
         ):
-            prepare_thumbnail(source_image, candidate, headline, thumbnail_config, root)
+            prepare_thumbnail(
+                source_image,
+                candidate,
+                headline,
+                thumbnail_config,
+                root,
+                episode.youtube_thumbnail_emphasis,
+            )
             thumbnail = candidate
     except YouTubePublishError as exc:
         print(f"Warning: {exc}; using the podcast cover for {episode.id}", file=sys.stderr)
@@ -753,9 +874,10 @@ def publish_episode(
                 "youtube_thumbnail_insight_url": thumbnail_page_url,
                 "youtube_thumbnail_source_url": thumbnail_source_url,
                 "youtube_thumbnail_source_sha256": thumbnail_source_sha256,
-                "youtube_thumbnail_template_version": YOUTUBE_THUMBNAIL_TEMPLATE_VERSION,
+                "youtube_thumbnail_template_version": thumbnail_template_version,
                 "youtube_thumbnail_render_sha256": thumbnail_render_hash,
                 "youtube_thumbnail_text": headline,
+                "youtube_thumbnail_emphasis": episode.youtube_thumbnail_emphasis,
                 "youtube_thumbnail_wave_symbol_sha256": wave_sha256,
             })
             metadata_path.write_text(
