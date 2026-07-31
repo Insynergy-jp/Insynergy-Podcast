@@ -1,0 +1,29 @@
+{
+  "title": "Can Japan's Government Turn AI Into Delivery Power?",
+  "source_file": "Insights/Can Japan's Government Turn AI Into Delivery Power?.md",
+  "script_file": "Podcast/Scripts/government-ai-decision-boundary-delivery-power-podcast.md",
+  "audio_file": "Podcast/Audio/government-ai-decision-boundary-delivery-power.mp3",
+  "language": "en",
+  "estimated_duration_minutes": 10,
+  "character_count": 10072,
+  "word_count": 1522,
+  "generated_at": "2026-07-31T06:16:54.735653+00:00",
+  "text_model": "gpt-5.4-mini",
+  "tts_model": "tts-1-hd",
+  "voice": "onyx",
+  "episode_id": "DD-049",
+  "episode": 49,
+  "voice_style": "academic",
+  "source_sha256": "00988d85b03e474082b9c1647f901b7268f58bc15b620cb19b91be6897f4a42a",
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/government-ai-decision-boundary-delivery-power",
+    "sourceTitle": "Can Japan's Government Turn AI Into Delivery Power?",
+    "sourceSlug": "government-ai-decision-boundary-delivery-power",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-03-03"
+  },
+  "published": "2026-07-31T15:13:56+09:00",
+  "duration_seconds": 639,
+  "public_audio_file": "audio/dd-049-government-ai-decision-boundary-delivery-power.mp3"
+}
