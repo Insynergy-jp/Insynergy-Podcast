@@ -14,3 +14,5 @@ duration_minutes: 10
 voice_style: academic
 source: Insights/The Subject Who Signs.md
 episode_type: full
+source_reference:
+  published_at: 2026-01-30

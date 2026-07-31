@@ -11,7 +11,7 @@ import re
 import shutil
 import subprocess
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from email.utils import format_datetime
 from pathlib import Path
@@ -21,6 +21,11 @@ from xml.etree import ElementTree as ET
 import yaml
 from mutagen.id3 import APIC, COMM, TALB, TIT2, TPE1, TPOS, TRCK, TXXX, ID3
 from mutagen.mp3 import MP3
+from source_reference import (
+    SourceReferenceError,
+    episode_source_reference,
+    validate_body_reference,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,6 +62,7 @@ class Episode:
     next_episode_id: str | None = None
     youtube_thumbnail_text: str = ""
     youtube_thumbnail_emphasis: str = ""
+    source_reference: dict[str, str] = field(default_factory=dict)
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -99,6 +105,7 @@ def parse_episode(path: Path, root: Path = ROOT) -> Episode:
     series = data.get("series", {})
     youtube = data.get("youtube", {})
     performance = data.get("performance")
+    source_reference = data.get("source_reference", {})
     if series is None:
         series = {}
     if youtube is None:
@@ -109,6 +116,10 @@ def parse_episode(path: Path, root: Path = ROOT) -> Episode:
         raise PublishError(f"{path}: youtube must be a mapping")
     if performance is not None and not isinstance(performance, dict):
         raise PublishError(f"{path}: performance must be a mapping")
+    if source_reference is None:
+        source_reference = {}
+    if not isinstance(source_reference, dict):
+        raise PublishError(f"{path}: source_reference must be a mapping")
     explicit_youtube_title = data.get("youtube_title")
     youtube_title = str(explicit_youtube_title or data["title"]).strip()
     if not youtube_title:
@@ -144,6 +155,7 @@ def parse_episode(path: Path, root: Path = ROOT) -> Episode:
         next_episode_id=(str(next_episode_id) if next_episode_id else None),
         youtube_thumbnail_text=thumbnail_text,
         youtube_thumbnail_emphasis=thumbnail_emphasis,
+        source_reference={str(key): str(value) for key, value in source_reference.items()},
         youtube_video_id=(str(data["youtube_video_id"]) if data.get("youtube_video_id") else None),
         manifest=path,
     )
@@ -262,7 +274,11 @@ def build_public(root: Path = ROOT, strict_email: bool = False) -> Path:
         apply_id3(target, episode, show, cover)
         seconds = ffprobe_duration(target)
         metadata = json.loads(metadata_path.read_text(encoding="utf-8")) if metadata_path.is_file() else {}
-        metadata.update({"episode_id": episode.id, "episode": episode.number, "published": episode.published.isoformat(), "duration_seconds": seconds, "public_audio_file": target.relative_to(public).as_posix()})
+        try:
+            source_reference = episode_source_reference(episode, show.get("youtube", {}))
+        except SourceReferenceError as exc:
+            raise PublishError(str(exc)) from exc
+        metadata.update({"episode_id": episode.id, "episode": episode.number, "published": episode.published.isoformat(), "duration_seconds": seconds, "public_audio_file": target.relative_to(public).as_posix(), "sourceReference": source_reference})
         metadata_path.parent.mkdir(parents=True, exist_ok=True)
         metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         published.append((episode, target, seconds))
@@ -278,6 +294,7 @@ def build_public(root: Path = ROOT, strict_email: bool = False) -> Path:
 
 def create_feed(show: dict[str, Any], episodes: list[tuple[Episode, Path, int]]) -> ET.Element:
     base = str(show["base_url"]).rstrip("/")
+    source_config = show.get("youtube", {})
     rss = ET.Element("rss", {"version": "2.0"})
     channel = ET.SubElement(rss, "channel")
     for tag, value in (("title", show["title"]), ("link", base + "/"), ("description", show["description"]), ("language", show["language"]), ("copyright", show.get("copyright", ""))):
@@ -293,9 +310,23 @@ def create_feed(show: dict[str, Any], episodes: list[tuple[Episode, Path, int]])
     ET.SubElement(owner, f"{{{ITUNES}}}name").text = str(show["author"])
     ET.SubElement(owner, f"{{{ITUNES}}}email").text = str(show["contact_email"])
     for episode, audio, seconds in episodes:
+        try:
+            source_reference = episode_source_reference(episode, source_config)
+            canonical_url = source_reference["canonicalUrl"]
+            source_description = (
+                f"{episode.description}\n\nRead the full Insynergy Insight:\n{canonical_url}"
+            )
+            validate_body_reference(
+                source_description,
+                canonical_url,
+                str(source_config.get("insights_base_url", "https://insynergy.io/insights")),
+            )
+        except SourceReferenceError as exc:
+            raise PublishError(str(exc)) from exc
         item = ET.SubElement(channel, "item")
         ET.SubElement(item, "title").text = episode.title
-        ET.SubElement(item, "description").text = episode.description
+        ET.SubElement(item, "link").text = canonical_url
+        ET.SubElement(item, "description").text = source_description
         ET.SubElement(item, "guid", {"isPermaLink": "false"}).text = f"urn:insynergy:podcast:{episode.id}"
         ET.SubElement(item, "pubDate").text = format_datetime(episode.published)
         url = f"{base}/audio/{audio.name}"

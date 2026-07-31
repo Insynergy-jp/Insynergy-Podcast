@@ -56,7 +56,8 @@ class YouTubePublishingTests(unittest.TestCase):
         return Episode(
             id="DD-003", number=3, title="Judgment, Not Meaning", slug="judgment-not-meaning",
             description="A description.", published=datetime.now(timezone.utc), status="published",
-            podcast=True, duration_minutes=10, voice_style="academic", source=Path("source.md"),
+            podcast=True, duration_minutes=10, voice_style="academic",
+            source=Path(__file__).resolve().parents[1] / "Insights/The Real Risk of AI Is Not the Loss of Meaning — It’s the Loss of Judgment.md",
             episode_type="full", youtube_video_id=None, manifest=Path("episode.yml"),
         )
 
@@ -83,6 +84,12 @@ class YouTubePublishingTests(unittest.TestCase):
             body["snippet"]["description"],
         )
         self.assertIn("Podcast RSS", body["snippet"]["description"])
+        self.assertEqual(
+            body["snippet"]["description"].count(
+                "https://insynergy.io/insights/judgment-not-meaning"
+            ),
+            1,
+        )
         self.assertEqual(body["snippet"]["defaultLanguage"], "en")
 
     def test_youtube_title_series_and_watch_next_are_used(self):
