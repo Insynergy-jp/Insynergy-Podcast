@@ -34,10 +34,10 @@
   "youtube_details_sha256": "a71b7d332ffc9a0765098b2228d0660d5d769070e5a3b9aa4bf4e7e19e5238fc",
   "youtube_thumbnail_source_sha256": "ce8e8cdbb6191b22aba13ab2f181d4c3009660aedefb40ddd9edac953710a643",
   "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
-  "youtube_thumbnail_render_sha256": "d1386b20f20e41e8e817d93031f3171062260fe08fb13478093bb3f7c148d908",
-  "youtube_thumbnail_text": "AI PUTS JUDGMENT AT RISK",
+  "youtube_thumbnail_render_sha256": "b815462694d88f3066e3ac2d6e08e308db0d5c09037d287bdd39cd38bcfdba3c",
+  "youtube_thumbnail_text": "AI JUDGMENT AT RISK",
   "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
-  "youtube_thumbnail_emphasis": "JUDGMENT",
+  "youtube_thumbnail_emphasis": "RISK",
   "youtube_thumbnail_fallback": null,
   "sourceReference": {
     "canonicalUrl": "https://insynergy.io/insights/decision-design-loss-of-judgment",
