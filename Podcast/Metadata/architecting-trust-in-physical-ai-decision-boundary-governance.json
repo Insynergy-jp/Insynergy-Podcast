@@ -40,5 +40,11 @@
   "youtube_thumbnail_text": "TRUST IS DESIGNED",
   "youtube_thumbnail_emphasis": "TRUST",
   "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
-  "youtube_thumbnail_fallback": null
+  "youtube_thumbnail_fallback": null,
+  "youtube_caption_id": "AUieDaZa4H1fqg78V5JVdb2lEz3I4_mFWpPR7cM2lxOMTU6a8lL_j2JM",
+  "youtube_caption_language": "en",
+  "youtube_japanese_caption_id": "AUieDaYktLSUw16QP5nwcJvv4Tu0bG3nm5it71MO07pkjNIdwIuNSePGXuc",
+  "youtube_japanese_caption_language": "ja",
+  "youtube_caption_timing": "audio-transcription-v1",
+  "youtube_english_caption_text_version": "insynergy-normalization-v1"
 }
