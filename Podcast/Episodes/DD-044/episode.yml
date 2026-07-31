@@ -1,0 +1,19 @@
+id: DD-044
+episode: 44
+title: Can AI Truly Prevent Financial Crime?
+youtube_title: AI Can Detect Financial Crime. It Cannot Decide What Happens Next.
+youtube_thumbnail_text: AI DETECTS YOU DECIDE
+youtube_thumbnail_emphasis: DECIDE
+slug: ai-financial-crime-decision-boundary
+description: >-
+  AI can detect suspicious patterns at extraordinary speed, but detection is
+  not prevention and probability is not judgment. This episode examines how
+  financial institutions must design explicit boundaries between automated
+  monitoring, human decisions, escalation, and accountability.
+published: 2026-07-31T13:59:00+09:00
+status: published
+podcast: true
+duration_minutes: 10
+voice_style: academic
+source: "Insights/Can AI Truly Prevent Financial Crime?.md"
+episode_type: full
