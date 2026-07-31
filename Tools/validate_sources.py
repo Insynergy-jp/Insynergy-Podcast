@@ -6,7 +6,12 @@ from __future__ import annotations
 import sys
 
 from publish_podcast import load_episodes, load_show
-from source_reference import SourceReferenceError, episode_source_reference, validate_remote_source
+from source_reference import (
+    SourceReferenceError,
+    episode_source_reference,
+    remote_validation_exemption,
+    validate_remote_source,
+)
 
 
 def run() -> int:
@@ -19,6 +24,13 @@ def run() -> int:
     for episode in episodes:
         try:
             reference = episode_source_reference(episode, config)
+            exemption_reason = remote_validation_exemption(episode)
+            if exemption_reason:
+                print(
+                    f"Exempted remote source validation: {episode.id} "
+                    f"{reference['canonicalUrl']} ({exemption_reason})"
+                )
+                continue
             validate_remote_source(reference)
         except SourceReferenceError as exc:
             failures.append(f"{episode.id}: {exc}")

@@ -12,6 +12,7 @@ from publish_podcast import Episode
 from source_reference import (
     SourceReferenceError,
     episode_source_reference,
+    remote_validation_exemption,
     validate_body_reference,
     validate_canonical_url,
     validate_remote_source,
@@ -95,6 +96,29 @@ class SourceReferenceTests(unittest.TestCase):
             reference = episode_source_reference(episode, {})
         self.assertEqual(reference["sourceTitle"], "Legacy Insight")
         self.assertEqual(reference["publishedAt"], "2026-01-01")
+
+    def test_remote_validation_exemption_requires_an_explicit_reason(self):
+        with tempfile.TemporaryDirectory() as directory:
+            episode = replace(
+                self.episode(self.write_source(directory)),
+                source_reference={"remote_validation": "exempt"},
+            )
+            with self.assertRaisesRegex(SourceReferenceError, "requires a reason"):
+                remote_validation_exemption(episode)
+
+    def test_remote_validation_exemption_returns_its_reason(self):
+        with tempfile.TemporaryDirectory() as directory:
+            episode = replace(
+                self.episode(self.write_source(directory)),
+                source_reference={
+                    "remote_validation": "exempt",
+                    "remote_validation_reason": "Legacy page is unavailable.",
+                },
+            )
+            self.assertEqual(
+                remote_validation_exemption(episode),
+                "Legacy page is unavailable.",
+            )
 
     def test_canonical_url_respects_the_configured_base(self):
         self.assertEqual(
