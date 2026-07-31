@@ -27,8 +27,8 @@
   "youtube_thumbnail_insight_url": "https://insynergy.io/insights/when-intelligence-becomes-abundant-judgment-must-be-designed",
   "youtube_thumbnail_source_url": "https://images.microcms-assets.io/assets/b935ff0e45414cb09179c63befb7cffc/9e189762bf4c4a0c8d8fb928da144d43/When%20Intelligence%20Becomes%20Abundant%2C%20Judgment%20Must%20Be%20Designed.png",
   "youtube_thumbnail_source_sha256": "89dc46b382c910430cdd3d1794602fa07683cb84bec940e6fe10f8b991cb10fe",
-  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
-  "youtube_thumbnail_render_sha256": "a25e778261c001e991f027c5084cf224bb3f23d924d5878e5dca87999dca348d",
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
+  "youtube_thumbnail_render_sha256": "7d1c9b6fe59cde15d58fc8ea5a188b1faceaca1a32d740a3a8a4168332607c8b",
   "youtube_thumbnail_text": "JUDGMENT MUST BE DESIGNED",
   "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
   "youtube_caption_id": "AUieDaYfAHQFdTkxOFXUSzlNVr1AbNuqTvpFZB8uJW14vQVjmuYAz3Gd",
@@ -36,5 +36,7 @@
   "youtube_japanese_caption_id": "AUieDaYiBxt4mrNOgYr5-Ff8ECGDyUewb1Sgl4zBIdfuCyIoOFBRQwfIRU4",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "youtube_thumbnail_emphasis": "JUDGMENT",
+  "youtube_thumbnail_fallback": null
 }

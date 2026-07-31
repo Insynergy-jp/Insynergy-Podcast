@@ -33,8 +33,10 @@
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_details_sha256": "3c7d6bb4635947b466cd8d15abeae53f0790605e7830aa582fb2cd06c0d828ef",
   "youtube_thumbnail_source_sha256": "3b2f20757a1f41cf65c66b36e6d41cb0d6b7f092d27ebb5c02ed671ed9533da5",
-  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v1",
-  "youtube_thumbnail_render_sha256": "2d9dd6bf6ecd610fdadbf44a0496352dfd0aa4b05587f90ca285ebf66ceb0807",
-  "youtube_thumbnail_text": "AI Isn't Eliminating Jobs",
-  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72"
+  "youtube_thumbnail_template_version": "insynergy-youtube-editorial-v2",
+  "youtube_thumbnail_render_sha256": "8eafcd1158c1244896d382d45dcadb5960769151a3ea2d6e9fd23feaee954574",
+  "youtube_thumbnail_text": "AI REVEALS BAD DECISIONS",
+  "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
+  "youtube_thumbnail_emphasis": "REVEALS",
+  "youtube_thumbnail_fallback": null
 }
