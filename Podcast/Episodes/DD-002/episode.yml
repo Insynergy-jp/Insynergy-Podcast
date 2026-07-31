@@ -20,3 +20,5 @@ source_reference:
   published_at: 2026-07-17
   language: en
   status: published
+  remote_validation: exempt
+  remote_validation_reason: Legacy Insight page is no longer publicly available (HTTP 404).

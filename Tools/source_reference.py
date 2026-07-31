@@ -142,6 +142,23 @@ def episode_source_reference(episode: Any, config: Mapping[str, Any]) -> dict[st
     }
 
 
+def remote_validation_exemption(episode: Any) -> str | None:
+    overrides = getattr(episode, "source_reference", {}) or {}
+    mode = str(overrides.get("remote_validation", "")).strip().lower()
+    if not mode:
+        return None
+    if mode != "exempt":
+        raise SourceReferenceError(
+            f"Unsupported source_reference.remote_validation value in {episode.manifest}: {mode}"
+        )
+    reason = str(overrides.get("remote_validation_reason", "")).strip()
+    if not reason:
+        raise SourceReferenceError(
+            f"Remote source validation exemption requires a reason: {episode.manifest}"
+        )
+    return reason
+
+
 def validate_body_reference(body: str, canonical_url: str, base_url: str = DEFAULT_INSIGHTS_BASE_URL) -> None:
     validate_canonical_url(canonical_url, base_url)
     if body.count(canonical_url) != 1:
