@@ -1,0 +1,19 @@
+id: DD-048
+episode: 48
+title: Trust in Physical AI Cannot Be Declared. It Must Be Architected.
+youtube_title: Trust in Physical AI Cannot Be Declared. It Must Be Architected.
+youtube_thumbnail_text: TRUST MUST BE ARCHITECTED
+youtube_thumbnail_emphasis: TRUST
+slug: architecting-trust-in-physical-ai-decision-boundary-governance
+description: >-
+  Physical AI turns failures into operational damage, disruption, and human
+  risk. This episode explains why trust cannot be declared through compliance
+  or performance metrics alone, and how Decision Boundaries architect human
+  authority, accountability, escalation, and assurance across the AI lifecycle.
+published: 2026-07-31T14:50:33+09:00
+status: published
+podcast: true
+duration_minutes: 10
+voice_style: academic
+source: "Insights/Trust in Physical AI Cannot Be Declared. It Must Be Architected.md"
+episode_type: full
