@@ -38,5 +38,13 @@
   "youtube_japanese_caption_id": "AUieDabsBSa7TkiLOPd7nxyesRaRbekS9ZR2PWbOh2j55FFg4xhZk6-MbAY",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/if-work-takes-10-minutes-why-human-judgment-remains",
+    "sourceTitle": "If the Work Takes 10 Minutes, Why Do You Still Need a Human?",
+    "sourceSlug": "if-work-takes-10-minutes-why-human-judgment-remains",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-02-26"
+  }
 }

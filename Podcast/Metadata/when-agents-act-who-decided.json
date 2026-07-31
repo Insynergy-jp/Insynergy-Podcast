@@ -38,5 +38,13 @@
   "youtube_japanese_caption_id": "AUieDaad5DgcgCxcZmkExjS7RW6CpBlgtj425G1s_u7M0P1vs2jqwXhrX5M",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/when-agents-act-who-decided",
+    "sourceTitle": "When Agents Act, Who Decided?",
+    "sourceSlug": "when-agents-act-who-decided",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-02-26"
+  }
 }

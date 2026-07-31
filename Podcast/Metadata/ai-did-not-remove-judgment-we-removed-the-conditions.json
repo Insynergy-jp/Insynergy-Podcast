@@ -38,5 +38,13 @@
   "youtube_thumbnail_text": "WE REMOVED THE CONDITIONS",
   "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
   "youtube_thumbnail_emphasis": "REMOVED",
-  "youtube_thumbnail_fallback": null
+  "youtube_thumbnail_fallback": null,
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/ai-did-not-remove-judgment-we-removed-the-conditions",
+    "sourceTitle": "AI Did Not Remove Judgment. We Removed the Conditions That Formed It.",
+    "sourceSlug": "ai-did-not-remove-judgment-we-removed-the-conditions",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-02-06"
+  }
 }

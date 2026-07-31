@@ -38,5 +38,13 @@
   "youtube_caption_timing": "audio-transcription-v1",
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
   "youtube_thumbnail_emphasis": "JUDGMENT",
-  "youtube_thumbnail_fallback": null
+  "youtube_thumbnail_fallback": null,
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/when-intelligence-becomes-abundant-judgment-must-be-designed",
+    "sourceTitle": "When Intelligence Becomes Abundant, Judgment Must Be Designed",
+    "sourceSlug": "when-intelligence-becomes-abundant-judgment-must-be-designed",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-02-24"
+  }
 }

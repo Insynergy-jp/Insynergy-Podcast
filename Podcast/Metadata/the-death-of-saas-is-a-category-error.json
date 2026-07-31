@@ -38,5 +38,13 @@
   "youtube_thumbnail_text": "SAAS ISN'T DYING",
   "youtube_thumbnail_emphasis": "ISN'T",
   "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
-  "youtube_thumbnail_fallback": "podcast-cover"
+  "youtube_thumbnail_fallback": "podcast-cover",
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/the-death-of-saas-is-a-category-error",
+    "sourceTitle": "The “Death of SaaS” Is a Category Error",
+    "sourceSlug": "the-death-of-saas-is-a-category-error",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-07-17"
+  }
 }

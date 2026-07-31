@@ -38,5 +38,13 @@
   "youtube_japanese_caption_id": "AUieDabtaMWj4liaqOBuEpmJ_srcp5zcQtphoVKi0Y9VIbQ3vosrfNeTJ8o",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/military-ai-boundary-design-decision-architecture",
+    "sourceTitle": "The Real Problem With Military AI Isn't Ethics. It's Boundary Design.",
+    "sourceSlug": "military-ai-boundary-design-decision-architecture",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-02-25"
+  }
 }

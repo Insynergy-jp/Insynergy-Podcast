@@ -38,5 +38,13 @@
   "youtube_thumbnail_text": "VOICE AI ERASES JUDGMENT",
   "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
   "youtube_thumbnail_emphasis": "ERASES",
-  "youtube_thumbnail_fallback": null
+  "youtube_thumbnail_fallback": null,
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/quiet-disappearance-of-judgment-voice-ai-decision-design",
+    "sourceTitle": "The Quiet Disappearance of Judgment: Voice, AI, and the Architecture of Human Deciding",
+    "sourceSlug": "quiet-disappearance-of-judgment-voice-ai-decision-design",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-02-05"
+  }
 }

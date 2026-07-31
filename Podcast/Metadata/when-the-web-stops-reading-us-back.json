@@ -38,5 +38,13 @@
   "youtube_thumbnail_text": "THE WEB STOPS READING US BACK",
   "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
   "youtube_thumbnail_emphasis": "STOPS",
-  "youtube_thumbnail_fallback": null
+  "youtube_thumbnail_fallback": null,
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/when-the-web-stops-reading-us-back",
+    "sourceTitle": "When the Web Stops Reading Us Back",
+    "sourceSlug": "when-the-web-stops-reading-us-back",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-02-14"
+  }
 }

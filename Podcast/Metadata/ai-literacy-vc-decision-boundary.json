@@ -38,5 +38,13 @@
   "youtube_thumbnail_text": "VC IS ASKING THE WRONG AI QUESTION",
   "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
   "youtube_thumbnail_emphasis": "WRONG",
-  "youtube_thumbnail_fallback": null
+  "youtube_thumbnail_fallback": null,
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/ai-literacy-vc-decision-boundary",
+    "sourceTitle": "AI Literacy Is Now a Job Requirement in VC. But the Real Question Is Being Missed.",
+    "sourceSlug": "ai-literacy-vc-decision-boundary",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-02-22"
+  }
 }

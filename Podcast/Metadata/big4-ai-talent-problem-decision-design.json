@@ -38,5 +38,13 @@
   "youtube_thumbnail_text": "BIG 4 AI TALENT ISN'T THE PROBLEM",
   "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
   "youtube_thumbnail_emphasis": "ISN'T",
-  "youtube_thumbnail_fallback": null
+  "youtube_thumbnail_fallback": null,
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/big4-ai-talent-problem-decision-design",
+    "sourceTitle": "The Big 4's AI Talent Problem Isn't About AI—It's About a Design That Was Never There",
+    "sourceSlug": "big4-ai-talent-problem-decision-design",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-02-07"
+  }
 }

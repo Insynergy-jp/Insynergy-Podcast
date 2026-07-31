@@ -38,5 +38,13 @@
   "youtube_thumbnail_text": "LAST SIGNATURE IS HUMAN",
   "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
   "youtube_thumbnail_emphasis": "HUMAN",
-  "youtube_thumbnail_fallback": null
+  "youtube_thumbnail_fallback": null,
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/the-last-signature-ai-judgment-bottleneck",
+    "sourceTitle": "The Last Signature",
+    "sourceSlug": "the-last-signature-ai-judgment-bottleneck",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-02-01"
+  }
 }

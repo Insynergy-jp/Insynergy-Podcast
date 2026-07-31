@@ -38,5 +38,13 @@
   "youtube_thumbnail_text": "POLICY LEFT JUDGMENT BLANK",
   "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
   "youtube_thumbnail_emphasis": "JUDGMENT",
-  "youtube_thumbnail_fallback": null
+  "youtube_thumbnail_fallback": null,
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/judgment-into-policy-content-blank",
+    "sourceTitle": "The Government Wrote \"Judgment\" Into Policy. Its Content Is Blank.",
+    "sourceSlug": "judgment-into-policy-content-blank",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-02-15"
+  }
 }

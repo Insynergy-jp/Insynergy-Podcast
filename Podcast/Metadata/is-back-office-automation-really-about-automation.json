@@ -38,5 +38,13 @@
   "youtube_japanese_caption_id": "AUieDaYa1fXMV-jD0dQ_Nx4Q7loWTMHC2RUDM_t0kS9zPSLjPTvbA7fhJtw",
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
-  "youtube_english_caption_text_version": "insynergy-normalization-v1"
+  "youtube_english_caption_text_version": "insynergy-normalization-v1",
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/is-back-office-automation-really-about-automation",
+    "sourceTitle": "Is Back-Office Automation Really About Automation?",
+    "sourceSlug": "is-back-office-automation-really-about-automation",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-02-24"
+  }
 }

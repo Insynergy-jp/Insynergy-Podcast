@@ -38,5 +38,13 @@
   "youtube_thumbnail_text": "INDIA'S AI SUMMIT MISSED THE HANDSHAKE",
   "youtube_thumbnail_wave_symbol_sha256": "7c5e3ab558a40f101dc55c66dfad7a05594d1e046da0a6aff1c9d4c86f28de72",
   "youtube_thumbnail_emphasis": "MISSED",
-  "youtube_thumbnail_fallback": null
+  "youtube_thumbnail_fallback": null,
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/when-ai-ceos-dont-shake-hands-competitive-architecture",
+    "sourceTitle": "The Handshake That Didn't Happen: What the India AI Summit Revealed About Competitive Architecture",
+    "sourceSlug": "when-ai-ceos-dont-shake-hands-competitive-architecture",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-02-20"
+  }
 }

@@ -37,5 +37,13 @@
   "youtube_japanese_caption_language": "ja",
   "youtube_caption_timing": "audio-transcription-v1",
   "youtube_english_caption_text_version": "insynergy-normalization-v1",
-  "youtube_thumbnail_emphasis": "FAIL"
+  "youtube_thumbnail_emphasis": "FAIL",
+  "sourceReference": {
+    "canonicalUrl": "https://insynergy.io/insights/why-ai-agents-fail-decision-boundary-design",
+    "sourceTitle": "Why AI Agents Fail in Practice — And Why Architecture Alone Won't Fix It",
+    "sourceSlug": "why-ai-agents-fail-decision-boundary-design",
+    "sourcePublisher": "Insynergy Insights",
+    "sourceLanguage": "en",
+    "publishedAt": "2026-02-24"
+  }
 }
