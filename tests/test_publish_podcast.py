@@ -61,6 +61,10 @@ class PublishingTests(unittest.TestCase):
         self.assertIn("urn:insynergy:podcast:DD-001", xml)
         self.assertIn('type="audio/mpeg"', xml)
         self.assertIn("00:01:05", xml)
+        expected_url = "https://insynergy.io/insights/the-question-they-didnt-ask-at-davos"
+        self.assertIn(f"<link>{expected_url}</link>", xml)
+        self.assertEqual(xml.count(expected_url), 2)
+        self.assertIn("Read the full Insynergy Insight", xml)
 
     def test_placeholder_email_is_rejected_for_deployment(self):
         with patch.dict("os.environ", {"PODCAST_EMAIL": "REPLACE_WITH_PUBLIC_EMAIL"}):

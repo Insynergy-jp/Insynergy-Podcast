@@ -27,6 +27,12 @@ from openai import OpenAI
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps, UnidentifiedImageError
 
 from publish_podcast import ROOT, Episode, generated_paths, load_episodes, load_show
+from source_reference import (
+    SourceReferenceError,
+    episode_insight_url,
+    episode_source_reference,
+    validate_body_reference,
+)
 
 
 YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload"
@@ -115,13 +121,10 @@ def _https_url(value: str, label: str) -> str:
 
 
 def insight_url(episode: Episode, config: Mapping[str, Any]) -> str:
-    overrides = config.get("insight_urls", {})
-    if isinstance(overrides, Mapping):
-        override = overrides.get(episode.slug) or overrides.get(episode.id)
-        if override:
-            return _https_url(str(override), "Insight URL")
-    base = str(config.get("insights_base_url", DEFAULT_INSIGHTS_BASE_URL)).rstrip("/")
-    return _https_url(f"{base}/{episode.slug}", "Insight URL")
+    try:
+        return episode_insight_url(episode, config)
+    except SourceReferenceError as exc:
+        raise YouTubePublishError(str(exc)) from exc
 
 
 def fetch_insight_og_image(
@@ -493,6 +496,14 @@ def video_body(
         "decision boundaries in AI-augmented organizations.",
     ])
     description = "\n\n".join(sections)
+    try:
+        validate_body_reference(
+            description,
+            article_url,
+            str(config.get("insights_base_url", DEFAULT_INSIGHTS_BASE_URL)),
+        )
+    except SourceReferenceError as exc:
+        raise YouTubePublishError(str(exc)) from exc
     return {
         "snippet": {
             "title": (episode.youtube_title or episode.title)[:100],
@@ -773,6 +784,10 @@ def publish_episode(
     if not audio.is_file() or not script.is_file() or not metadata_path.is_file():
         raise YouTubePublishError(f"Generated podcast assets are missing for {episode.id}")
     metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    try:
+        metadata["sourceReference"] = episode_source_reference(episode, config)
+    except SourceReferenceError as exc:
+        raise YouTubePublishError(str(exc)) from exc
     video_id = metadata.get("youtube_video_id")
     if not video_id and episode.youtube_video_id:
         video_id = episode.youtube_video_id

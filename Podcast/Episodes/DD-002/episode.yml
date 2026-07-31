@@ -14,3 +14,9 @@ duration_minutes: 10
 voice_style: academic
 source: Insights/The “Death of SaaS” Is a Category Error.md
 episode_type: full
+source_reference:
+  title: The “Death of SaaS” Is a Category Error
+  slug: the-death-of-saas-is-a-category-error
+  published_at: 2026-07-17
+  language: en
+  status: published

@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 from publish_podcast import ROOT, PublishError, build_public, generated_paths, load_episodes, load_show
+from source_reference import SourceReferenceError, episode_source_reference
 
 
 def sha256(path: Path) -> str:
@@ -32,6 +33,20 @@ def is_fresh(source_hash: str, script: Path, audio: Path, metadata: Path) -> boo
     return data.get("source_sha256") == source_hash
 
 
+def persist_source_reference(metadata: Path, source_reference: dict[str, str]) -> bool:
+    if not metadata.is_file():
+        return False
+    try:
+        data = json.loads(metadata.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise PublishError(f"Could not update source reference in {metadata}: {exc}") from exc
+    if data.get("sourceReference") == source_reference:
+        return False
+    data["sourceReference"] = source_reference
+    metadata.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return True
+
+
 def run(force: bool = False, strict_email: bool = False) -> None:
     show = load_show()
     profiles = show.get("voice_profiles", {})
@@ -41,11 +56,16 @@ def run(force: bool = False, strict_email: bool = False) -> None:
     for episode in load_episodes():
         if not episode.podcast or episode.status != "published":
             continue
+        try:
+            source_reference = episode_source_reference(episode, show.get("youtube", {}))
+        except SourceReferenceError as exc:
+            raise PublishError(str(exc)) from exc
         profile = profiles.get(episode.voice_style)
         if not isinstance(profile, dict) or not profile.get("voice"):
             raise PublishError(f"Unknown voice_style '{episode.voice_style}' in {episode.manifest}")
         script, audio, metadata = generated_paths(episode)
         source_hash = sha256(episode.source)
+        persist_source_reference(metadata, source_reference)
         if not force and is_fresh(source_hash, script, audio, metadata):
             print(f"Fresh: {episode.id}")
             continue
@@ -67,7 +87,7 @@ def run(force: bool = False, strict_email: bool = False) -> None:
         if result.returncode != 0:
             raise PublishError(f"Generation failed for {episode.id}")
         data = json.loads(metadata.read_text(encoding="utf-8"))
-        data.update({"episode_id": episode.id, "episode": episode.number, "voice_style": episode.voice_style, "source_sha256": source_hash})
+        data.update({"episode_id": episode.id, "episode": episode.number, "voice_style": episode.voice_style, "source_sha256": source_hash, "sourceReference": source_reference})
         metadata.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         generated += 1
     feed = build_public(strict_email=strict_email)
