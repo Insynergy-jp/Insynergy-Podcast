@@ -1,0 +1,19 @@
+id: DD-056
+episode: 56
+title: "What Salesforce Didn't Say: The Interface Has Changed"
+youtube_title: "What Salesforce Didn't Say About the New AI Interface"
+youtube_thumbnail_text: THE INTERFACE CHANGED. THE PROBLEM DID TOO.
+youtube_thumbnail_emphasis: PROBLEM
+slug: what-salesforce-didnt-say-the-interface-has-changed
+description: >-
+  Enterprise software is shifting from screens and menus toward conversational
+  AI agents. This episode examines what that interface change leaves unresolved:
+  who holds decision authority when software interprets intent, recommends
+  action, and executes—and why the deeper problem is judgment architecture.
+published: 2026-08-04T15:23:17+09:00
+status: published
+podcast: true
+duration_minutes: 10
+voice_style: academic
+source: "Insights/What Salesforce Didn't Say- The Interface Has Changed, and So Has the Problem.md"
+episode_type: full
