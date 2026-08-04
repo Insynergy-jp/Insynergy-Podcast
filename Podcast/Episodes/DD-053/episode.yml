@@ -1,0 +1,19 @@
+id: DD-053
+episode: 53
+title: "AI Agent Liability Is the Wrong Debate"
+youtube_title: "AI Agent Liability Is the Wrong Debate"
+youtube_thumbnail_text: LIABILITY IS THE WRONG DEBATE
+youtube_thumbnail_emphasis: WRONG
+slug: ai-agent-liability-vs-decision-architecture
+description: >-
+  Debates about AI agent liability begin after harm has already occurred. This
+  episode examines the deeper structural problem: organizations deploy agents
+  without explicitly designing decision authority, escalation boundaries, and
+  accountability—and explains why Decision Architecture must come first.
+published: 2026-08-04T13:51:57+09:00
+status: published
+podcast: true
+duration_minutes: 10
+voice_style: academic
+source: "Insights/AI Agent Liability Is the Wrong Debate — The Real Problem Is Decision Architecture.md"
+episode_type: full
