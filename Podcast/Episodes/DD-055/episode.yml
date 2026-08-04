@@ -1,0 +1,19 @@
+id: DD-055
+episode: 55
+title: 'When AI "Judges" and RPA Executes: Who Draws the Line?'
+youtube_title: 'When AI "Judges" and RPA Executes: Who Draws the Line?'
+youtube_thumbnail_text: WHO DRAWS THE DECISION LINE?
+youtube_thumbnail_emphasis: DECISION
+slug: when-ai-judges-and-rpa-executes-decision-boundary
+description: >-
+  Generative AI can interpret ambiguous inputs while RPA executes the resulting
+  actions—but technical handoffs do not define decision authority. This episode
+  examines who draws the line between machine output and accountable judgment,
+  and why end-to-end automation requires an explicit Decision Boundary.
+published: 2026-08-04T14:22:41+09:00
+status: published
+podcast: true
+duration_minutes: 10
+voice_style: academic
+source: 'Insights/When AI "Judges" and RPA Executes- Who Actually Draws the Line?.md'
+episode_type: full
