@@ -1,0 +1,19 @@
+id: DD-058
+episode: 58
+title: '"Human in the Loop" Is Not a Governance Answer'
+youtube_title: '"Human in the Loop" Is Not a Governance Answer'
+youtube_thumbnail_text: HUMAN IN THE LOOP IS NOT GOVERNANCE
+youtube_thumbnail_emphasis: NOT
+slug: human-in-the-loop-is-not-a-governance-answer
+description: >-
+  Requiring a human somewhere in an AI workflow does not define who has
+  authority, what must be reviewed, or where accountability attaches. This
+  episode examines why human-in-the-loop is only a control mechanism—and why
+  AI governance requires Decision Boundaries, Decision Logs, and judgment architecture.
+published: 2026-08-06T21:04:26+09:00
+status: published
+podcast: true
+duration_minutes: 10
+voice_style: academic
+source: 'Insights/"Human in the Loop" Is Not a Governance Answer.md'
+episode_type: full
