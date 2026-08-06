@@ -1,0 +1,19 @@
+id: DD-059
+episode: 59
+title: "Beyond Human-in-the-Loop: Why AI Governance Requires Judgment Architecture"
+youtube_title: "Beyond Human-in-the-Loop: Judgment Architecture for AI Governance"
+youtube_thumbnail_text: HUMAN-IN-THE-LOOP IS NOT ENOUGH
+youtube_thumbnail_emphasis: NOT ENOUGH
+slug: beyond-human-in-the-loop-ai-governance-judgment-architecture
+description: >-
+  Keeping humans in AI workflows is the right instinct, but it does not specify
+  who has authority, what must be reviewed, or how accountability persists.
+  This episode examines why AI governance must move beyond a control mechanism
+  toward Decision Boundaries, Decision Logs, and judgment architecture.
+published: 2026-08-06T21:54:16+09:00
+status: published
+podcast: true
+duration_minutes: 10
+voice_style: academic
+source: "Insights/Beyond Human-in-the-Loop- Why AI Governance Requires Judgment Architecture.md"
+episode_type: full
