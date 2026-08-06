@@ -1,0 +1,20 @@
+id: DD-060
+episode: 60
+title: "The Real Risk of AI-Driven Development Is Undesigned Judgment"
+youtube_title: "The Real Risk of AI-Driven Development Is Undesigned Judgment"
+youtube_thumbnail_text: AI DEVELOPMENT HAS UNDESIGNED JUDGMENT
+youtube_thumbnail_emphasis: UNDESIGNED JUDGMENT
+slug: ai-driven-development-undesigned-judgment-risk
+description: >-
+  AI-generated code can accelerate delivery while overwhelming meaningful human
+  review. This episode examines why legacy code, security, licensing, and data
+  leakage risks share a deeper cause: organizations have not designed decision
+  authority, review conditions, escalation paths, and accountability for
+  AI-driven development.
+published: 2026-08-07T08:09:36+09:00
+status: published
+podcast: true
+duration_minutes: 10
+voice_style: academic
+source: "Insights/The Real Risk of AI-Driven Development Is Not Bad Code. It Is Undesigned Judgment.md"
+episode_type: full
