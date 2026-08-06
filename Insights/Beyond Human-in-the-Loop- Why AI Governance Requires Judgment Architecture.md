@@ -52,7 +52,7 @@ relations: {}
 aliases: []
 llmo_metadata:
   title: 'Beyond Human-in-the-Loop: Why AI Governance Requires Judgment Architecture'
-  slug: beyond-human-in-the-loop-judgment-architecture
+  slug: beyond-human-in-the-loop-ai-governance-judgment-architecture
   topic: AI governance and judgment authority design
   concepts:
   - Decision Design
