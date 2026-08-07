@@ -1,0 +1,20 @@
+id: DD-069
+episode: 69
+title: "Who Decided? AI Governance Has a Judgment Problem"
+youtube_title: "Who Decided? The Question AI Governance Keeps Avoiding"
+youtube_thumbnail_text: WHO DECIDED?
+youtube_thumbnail_emphasis: DECIDED
+slug: who-decided-ai-governance-authority-allocation
+description: >-
+  AI increasingly shapes the information on which people buy, litigate, and
+  vote, while institutions still treat the resulting choices as purely human.
+  This episode examines invisible judgment delegation and explains why AI
+  governance must explicitly allocate authority through Decision Boundaries
+  and preserve accountability through Decision Logs.
+published: 2026-08-07T17:05:10+09:00
+status: published
+podcast: true
+duration_minutes: 10
+voice_style: academic
+source: "Insights/Who Decided? The Question AI Governance Keeps Avoiding.md"
+episode_type: full
