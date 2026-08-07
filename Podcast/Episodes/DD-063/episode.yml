@@ -1,0 +1,20 @@
+id: DD-063
+episode: 63
+title: "The Real Problem With Agentic AI Is Not Autonomy. It Is Undesigned Authority"
+youtube_title: "Agentic AI's Real Problem: Undesigned Authority"
+youtube_thumbnail_text: AGENTIC AI NEEDS DESIGNED AUTHORITY
+youtube_thumbnail_emphasis: AUTHORITY
+slug: the-real-problem-with-agentic-ai-is-undesigned-authority
+description: >-
+  Agentic AI does not primarily fail because it is autonomous. It exposes
+  authority structures that organizations never designed. This episode
+  explains why guardrails and human-in-the-loop controls are insufficient
+  without explicit Decision Boundaries, genuine transfers of judgment, and
+  Decision Logs that preserve accountability across human and machine action.
+published: 2026-08-07T13:43:09+09:00
+status: published
+podcast: true
+duration_minutes: 10
+voice_style: academic
+source: "Insights/The Real Problem With Agentic AI Is Not Autonomy. It Is Undesigned Authority.md"
+episode_type: full
