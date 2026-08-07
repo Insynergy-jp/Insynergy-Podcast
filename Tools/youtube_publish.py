@@ -45,7 +45,7 @@ DEFAULT_CAPTION_TRANSLATION_MODEL = "gpt-5.4-mini"
 CAPTION_TRANSLATION_BATCH_SIZE = 20
 OG_THUMBNAIL_VERSION = "insynergy-insight-og-v1"
 LEGACY_YOUTUBE_THUMBNAIL_TEMPLATE_VERSION = "insynergy-youtube-editorial-v1"
-YOUTUBE_THUMBNAIL_TEMPLATE_VERSION = "insynergy-youtube-editorial-v2"
+YOUTUBE_THUMBNAIL_TEMPLATE_VERSION = "insynergy-youtube-editorial-v3"
 YOUTUBE_DETAILS_VERSION = "insynergy-youtube-details-v2"
 YOUTUBE_DESCRIPTION_VERSION = YOUTUBE_DETAILS_VERSION
 DEFAULT_INSIGHTS_BASE_URL = "https://insynergy.io/insights"
@@ -344,6 +344,10 @@ def prepare_thumbnail(
         prefix = headline[:match.start()].strip()
         focus = headline[match.start():match.end()]
         suffix = headline[match.end():].strip()
+        leading_punctuation = re.match(r"^[?!:;,.]+", suffix)
+        if leading_punctuation:
+            focus += leading_punctuation.group(0)
+            suffix = suffix[leading_punctuation.end():].strip()
         supporting_font = _font(55, bold=True)
         prefix_lines = _wrap_text(draw, prefix, supporting_font, 590) if prefix else []
         suffix_lines = _wrap_text(draw, suffix, supporting_font, 590) if suffix else []

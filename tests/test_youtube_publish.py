@@ -219,6 +219,23 @@ class YouTubePublishingTests(unittest.TestCase):
             self.assertGreater(cyan_pixels, 500)
             self.assertGreater(royal_blue_pixels, 500)
 
+    def test_thumbnail_keeps_trailing_question_mark_with_emphasis(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.png"
+            destination = root / "thumbnail.jpg"
+            Image.new("RGB", (1280, 720), "#D8DEE8").save(source)
+            with patch("youtube_publish._gradient_text") as gradient_text:
+                prepare_thumbnail(
+                    source,
+                    destination,
+                    "WHO DECIDED?",
+                    {},
+                    root,
+                    "DECIDED",
+                )
+            self.assertEqual(gradient_text.call_args.args[2], "DECIDED?")
+
     def test_thumbnail_text_is_explicit_or_safely_shortened(self):
         from dataclasses import replace
         explicit = replace(self.episode(), youtube_thumbnail_text="A SHORT PROMISE")
